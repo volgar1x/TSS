@@ -1,0 +1,14 @@
+raise <Nat_expected = unit> as <Bool_expected : Unit | Nat_expected : Unit | Pred_0 : Nat> : Thrown
+
+0 : Nat
+
+raise <Nat_expected = unit> as <Bool_expected : Unit | Nat_expected : Unit | Pred_0 : Nat> : Nat
+
+succ 0 : Nat
+
+0 : Nat
+
+raise <Pred_0 = 0> as <Bool_expected : Unit | Nat_expected : Unit | Pred_0 : Nat> : Nat
+
+raise <Pred_0 = 0> as <Bool_expected : Unit | Nat_expected : Unit | Pred_0 : Nat> : Nat
+

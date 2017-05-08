@@ -1,0 +1,52 @@
+unit : Unit
+
+unit : Unit
+
+lambda x : Unit. 
+  lambda y : Unit. 
+    x : (Unit -> (Unit -> Unit))
+
+0 : Nat
+
+lambda y : Nat. 
+  0 : (Nat -> Nat)
+
+0 : Nat
+
+true : Bool
+
+{champ1 = 0, champ2 = succ 0} : {champ1 : Nat, champ2 : Nat}
+
+succ 0 : Nat
+
+{flag = true, val = 0} : {flag : Bool, val : Nat}
+
+v1 = <bidon1 = true> as <bidon1 : Bool | bidon2 : Nat> : <bidon1 : Bool | bidon2 : Nat>
+
+v2 = <bidon2 = 0> as <bidon1 : Bool | bidon2 : Nat> : <bidon1 : Bool | bidon2 : Nat>
+
+fct_bidon = lambda v : <bidon1 : Bool | bidon2 : Nat>. 
+  case v of 
+    | <bidon1 = x1> => if x1 then 
+      0
+    else 
+      succ 0
+    | <bidon2 = x2> => succ x2
+ : (<bidon1 : Bool | bidon2 : Nat> -> Nat)
+
+0 : Nat
+
+succ 0 : Nat
+
+var = <machin = {chouette = false, chose = 0}> as <truc : Nat | bidule : Nat | machin : {chouette : Bool, chose : Nat}> : <truc : Nat | bidule : Nat | machin : {chouette : Bool, chose : Nat}>
+
+f = lambda x : <truc : Nat | bidule : Nat | machin : {chouette : Bool, chose : Nat}>. 
+  case x of 
+    | <bidule = id> => succ id
+    | <_ = > => 0
+ : (<truc : Nat | bidule : Nat | machin : {chouette : Bool, chose : Nat}> -> Nat)
+
+0 : Nat
+
+succ succ succ succ succ 0 : Nat
+

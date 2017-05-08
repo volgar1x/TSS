@@ -1,0 +1,902 @@
+lambda s. 
+  lambda z. 
+    s z
+
+lambda s. 
+  lambda z. 
+    s (
+      (
+        lambda s. 
+          lambda z. 
+            z
+      ) s z
+    )
+
+let bug = lambda x. 
+  (
+    lambda y. 
+      x y
+  ) y
+ : terme non-clos !
+
+s (
+  (
+    lambda s. 
+      lambda z. 
+        z
+  ) s z
+) : terme non-clos !
+
+lambda s. 
+  lambda z. 
+    (
+      lambda s. 
+        lambda z. 
+          s z
+    ) s (
+      (
+        lambda s. 
+          lambda z. 
+            s (
+              s z
+            )
+      ) s z
+    )
+
+tru = lambda t. 
+  lambda f. 
+    t
+
+fls = lambda t. 
+  lambda f. 
+    f
+
+and = lambda b1. 
+  lambda b2. 
+    b1 b2 (
+      lambda t. 
+        lambda f. 
+          f
+    )
+
+cond = lambda b. 
+  lambda t. 
+    lambda f. 
+      b t f
+
+pair = lambda f. 
+  lambda s. 
+    lambda b. 
+      b f s
+
+fst = lambda p. 
+  p (
+    lambda t. 
+      lambda f. 
+        t
+  )
+
+snd = lambda p. 
+  p (
+    lambda t. 
+      lambda f. 
+        f
+  )
+
+c0 = lambda s. 
+  lambda z. 
+    z
+
+c1 = lambda s. 
+  lambda z. 
+    s z
+
+c2 = lambda s. 
+  lambda z. 
+    s (
+      s z
+    )
+
+c3 = lambda s. 
+  lambda z. 
+    s (
+      s (
+        s z
+      )
+    )
+
+scc = lambda n. 
+  lambda s. 
+    lambda z. 
+      s (
+        n s z
+      )
+
+iszro = lambda m. 
+  m (
+    lambda x. 
+      lambda t. 
+        lambda f. 
+          f
+  ) (
+    lambda t. 
+      lambda f. 
+        t
+  )
+
+plus = lambda m. 
+  lambda n. 
+    lambda s. 
+      lambda z. 
+        m s (
+          n s z
+        )
+
+times = lambda m. 
+  lambda n. 
+    m (
+      (
+        lambda m. 
+          lambda n. 
+            lambda s. 
+              lambda z. 
+                m s (
+                  n s z
+                )
+      ) n
+    ) (
+      lambda s. 
+        lambda z. 
+          z
+    )
+
+zz = lambda b. 
+  b (
+    lambda s. 
+      lambda z. 
+        z
+  ) (
+    lambda s. 
+      lambda z. 
+        z
+  )
+
+ss = lambda p. 
+  (
+    lambda f. 
+      lambda s. 
+        lambda b. 
+          b f s
+  ) (
+    (
+      lambda p. 
+        p (
+          lambda t. 
+            lambda f. 
+              f
+        )
+    ) p
+  ) (
+    (
+      lambda m. 
+        lambda n. 
+          lambda s. 
+            lambda z. 
+              m s (
+                n s z
+              )
+    ) (
+      (
+        lambda n. 
+          lambda s. 
+            lambda z. 
+              s (
+                n s z
+              )
+      ) (
+        lambda s. 
+          lambda z. 
+            z
+      )
+    ) (
+      (
+        lambda p. 
+          p (
+            lambda t. 
+              lambda f. 
+                f
+          )
+      ) p
+    )
+  )
+
+prd = lambda m. 
+  (
+    lambda p. 
+      p (
+        lambda t. 
+          lambda f. 
+            t
+      )
+  ) (
+    m (
+      lambda p. 
+        (
+          lambda f. 
+            lambda s. 
+              lambda b. 
+                b f s
+        ) (
+          (
+            lambda p. 
+              p (
+                lambda t. 
+                  lambda f. 
+                    f
+              )
+          ) p
+        ) (
+          (
+            lambda m. 
+              lambda n. 
+                lambda s. 
+                  lambda z. 
+                    m s (
+                      n s z
+                    )
+          ) (
+            (
+              lambda n. 
+                lambda s. 
+                  lambda z. 
+                    s (
+                      n s z
+                    )
+            ) (
+              lambda s. 
+                lambda z. 
+                  z
+            )
+          ) (
+            (
+              lambda p. 
+                p (
+                  lambda t. 
+                    lambda f. 
+                      f
+                )
+            ) p
+          )
+        )
+    ) (
+      lambda b. 
+        b (
+          lambda s. 
+            lambda z. 
+              z
+        ) (
+          lambda s. 
+            lambda z. 
+              z
+        )
+    )
+  )
+
+equal = lambda m. 
+  lambda n. 
+    (
+      lambda b1. 
+        lambda b2. 
+          b1 b2 (
+            lambda t. 
+              lambda f. 
+                f
+          )
+    ) (
+      (
+        lambda m. 
+          m (
+            lambda x. 
+              lambda t. 
+                lambda f. 
+                  f
+          ) (
+            lambda t. 
+              lambda f. 
+                t
+          )
+      ) (
+        m (
+          lambda m. 
+            (
+              lambda p. 
+                p (
+                  lambda t. 
+                    lambda f. 
+                      t
+                )
+            ) (
+              m (
+                lambda p. 
+                  (
+                    lambda f. 
+                      lambda s. 
+                        lambda b. 
+                          b f s
+                  ) (
+                    (
+                      lambda p. 
+                        p (
+                          lambda t. 
+                            lambda f. 
+                              f
+                        )
+                    ) p
+                  ) (
+                    (
+                      lambda m. 
+                        lambda n. 
+                          lambda s. 
+                            lambda z. 
+                              m s (
+                                n s z
+                              )
+                    ) (
+                      (
+                        lambda n. 
+                          lambda s. 
+                            lambda z. 
+                              s (
+                                n s z
+                              )
+                      ) (
+                        lambda s. 
+                          lambda z. 
+                            z
+                      )
+                    ) (
+                      (
+                        lambda p. 
+                          p (
+                            lambda t. 
+                              lambda f. 
+                                f
+                          )
+                      ) p
+                    )
+                  )
+              ) (
+                lambda b. 
+                  b (
+                    lambda s. 
+                      lambda z. 
+                        z
+                  ) (
+                    lambda s. 
+                      lambda z. 
+                        z
+                  )
+              )
+            )
+        ) n
+      )
+    ) (
+      (
+        lambda m. 
+          m (
+            lambda x. 
+              lambda t. 
+                lambda f. 
+                  f
+          ) (
+            lambda t. 
+              lambda f. 
+                t
+          )
+      ) (
+        n (
+          lambda m. 
+            (
+              lambda p. 
+                p (
+                  lambda t. 
+                    lambda f. 
+                      t
+                )
+            ) (
+              m (
+                lambda p. 
+                  (
+                    lambda f. 
+                      lambda s. 
+                        lambda b. 
+                          b f s
+                  ) (
+                    (
+                      lambda p. 
+                        p (
+                          lambda t. 
+                            lambda f. 
+                              f
+                        )
+                    ) p
+                  ) (
+                    (
+                      lambda m. 
+                        lambda n. 
+                          lambda s. 
+                            lambda z. 
+                              m s (
+                                n s z
+                              )
+                    ) (
+                      (
+                        lambda n. 
+                          lambda s. 
+                            lambda z. 
+                              s (
+                                n s z
+                              )
+                      ) (
+                        lambda s. 
+                          lambda z. 
+                            z
+                      )
+                    ) (
+                      (
+                        lambda p. 
+                          p (
+                            lambda t. 
+                              lambda f. 
+                                f
+                          )
+                      ) p
+                    )
+                  )
+              ) (
+                lambda b. 
+                  b (
+                    lambda s. 
+                      lambda z. 
+                        z
+                  ) (
+                    lambda s. 
+                      lambda z. 
+                        z
+                  )
+              )
+            )
+        ) m
+      )
+    )
+
+lambda t. 
+  lambda f. 
+    t
+
+lambda t. 
+  lambda f. 
+    t
+
+f = lambda fct. 
+  lambda n. 
+    (
+      lambda b. 
+        lambda t. 
+          lambda f. 
+            b t f
+    ) (
+      (
+        lambda m. 
+          m (
+            lambda x. 
+              lambda t. 
+                lambda f. 
+                  f
+          ) (
+            lambda t. 
+              lambda f. 
+                t
+          )
+      ) n
+    ) (
+      lambda x. 
+        lambda s. 
+          lambda z. 
+            s z
+    ) (
+      lambda x. 
+        (
+          lambda m. 
+            lambda n. 
+              m (
+                (
+                  lambda m. 
+                    lambda n. 
+                      lambda s. 
+                        lambda z. 
+                          m s (
+                            n s z
+                          )
+                ) n
+              ) (
+                lambda s. 
+                  lambda z. 
+                    z
+              )
+        ) n (
+          fct (
+            (
+              lambda m. 
+                (
+                  lambda p. 
+                    p (
+                      lambda t. 
+                        lambda f. 
+                          t
+                    )
+                ) (
+                  m (
+                    lambda p. 
+                      (
+                        lambda f. 
+                          lambda s. 
+                            lambda b. 
+                              b f s
+                      ) (
+                        (
+                          lambda p. 
+                            p (
+                              lambda t. 
+                                lambda f. 
+                                  f
+                            )
+                        ) p
+                      ) (
+                        (
+                          lambda m. 
+                            lambda n. 
+                              lambda s. 
+                                lambda z. 
+                                  m s (
+                                    n s z
+                                  )
+                        ) (
+                          (
+                            lambda n. 
+                              lambda s. 
+                                lambda z. 
+                                  s (
+                                    n s z
+                                  )
+                          ) (
+                            lambda s. 
+                              lambda z. 
+                                z
+                          )
+                        ) (
+                          (
+                            lambda p. 
+                              p (
+                                lambda t. 
+                                  lambda f. 
+                                    f
+                              )
+                          ) p
+                        )
+                      )
+                  ) (
+                    lambda b. 
+                      b (
+                        lambda s. 
+                          lambda z. 
+                            z
+                      ) (
+                        lambda s. 
+                          lambda z. 
+                            z
+                      )
+                  )
+                )
+            ) n
+          )
+        )
+    ) (
+      lambda s. 
+        lambda z. 
+          z
+    )
+
+z = lambda f. 
+  lambda y. 
+    (
+      lambda x. 
+        f (
+          lambda y. 
+            x x y
+        )
+    ) (
+      lambda x. 
+        f (
+          lambda y. 
+            x x y
+        )
+    ) y
+
+fact = lambda y. 
+  (
+    lambda x. 
+      (
+        lambda fct. 
+          lambda n. 
+            (
+              lambda b. 
+                lambda t. 
+                  lambda f. 
+                    b t f
+            ) (
+              (
+                lambda m. 
+                  m (
+                    lambda x. 
+                      lambda t. 
+                        lambda f. 
+                          f
+                  ) (
+                    lambda t. 
+                      lambda f. 
+                        t
+                  )
+              ) n
+            ) (
+              lambda x. 
+                lambda s. 
+                  lambda z. 
+                    s z
+            ) (
+              lambda x. 
+                (
+                  lambda m. 
+                    lambda n. 
+                      m (
+                        (
+                          lambda m. 
+                            lambda n. 
+                              lambda s. 
+                                lambda z. 
+                                  m s (
+                                    n s z
+                                  )
+                        ) n
+                      ) (
+                        lambda s. 
+                          lambda z. 
+                            z
+                      )
+                ) n (
+                  fct (
+                    (
+                      lambda m. 
+                        (
+                          lambda p. 
+                            p (
+                              lambda t. 
+                                lambda f. 
+                                  t
+                            )
+                        ) (
+                          m (
+                            lambda p. 
+                              (
+                                lambda f. 
+                                  lambda s. 
+                                    lambda b. 
+                                      b f s
+                              ) (
+                                (
+                                  lambda p. 
+                                    p (
+                                      lambda t. 
+                                        lambda f. 
+                                          f
+                                    )
+                                ) p
+                              ) (
+                                (
+                                  lambda m. 
+                                    lambda n. 
+                                      lambda s. 
+                                        lambda z. 
+                                          m s (
+                                            n s z
+                                          )
+                                ) (
+                                  (
+                                    lambda n. 
+                                      lambda s. 
+                                        lambda z. 
+                                          s (
+                                            n s z
+                                          )
+                                  ) (
+                                    lambda s. 
+                                      lambda z. 
+                                        z
+                                  )
+                                ) (
+                                  (
+                                    lambda p. 
+                                      p (
+                                        lambda t. 
+                                          lambda f. 
+                                            f
+                                      )
+                                  ) p
+                                )
+                              )
+                          ) (
+                            lambda b. 
+                              b (
+                                lambda s. 
+                                  lambda z. 
+                                    z
+                              ) (
+                                lambda s. 
+                                  lambda z. 
+                                    z
+                              )
+                          )
+                        )
+                    ) n
+                  )
+                )
+            ) (
+              lambda s. 
+                lambda z. 
+                  z
+            )
+      ) (
+        lambda y. 
+          x x y
+      )
+  ) (
+    lambda x. 
+      (
+        lambda fct. 
+          lambda n. 
+            (
+              lambda b. 
+                lambda t. 
+                  lambda f. 
+                    b t f
+            ) (
+              (
+                lambda m. 
+                  m (
+                    lambda x. 
+                      lambda t. 
+                        lambda f. 
+                          f
+                  ) (
+                    lambda t. 
+                      lambda f. 
+                        t
+                  )
+              ) n
+            ) (
+              lambda x. 
+                lambda s. 
+                  lambda z. 
+                    s z
+            ) (
+              lambda x. 
+                (
+                  lambda m. 
+                    lambda n. 
+                      m (
+                        (
+                          lambda m. 
+                            lambda n. 
+                              lambda s. 
+                                lambda z. 
+                                  m s (
+                                    n s z
+                                  )
+                        ) n
+                      ) (
+                        lambda s. 
+                          lambda z. 
+                            z
+                      )
+                ) n (
+                  fct (
+                    (
+                      lambda m. 
+                        (
+                          lambda p. 
+                            p (
+                              lambda t. 
+                                lambda f. 
+                                  t
+                            )
+                        ) (
+                          m (
+                            lambda p. 
+                              (
+                                lambda f. 
+                                  lambda s. 
+                                    lambda b. 
+                                      b f s
+                              ) (
+                                (
+                                  lambda p. 
+                                    p (
+                                      lambda t. 
+                                        lambda f. 
+                                          f
+                                    )
+                                ) p
+                              ) (
+                                (
+                                  lambda m. 
+                                    lambda n. 
+                                      lambda s. 
+                                        lambda z. 
+                                          m s (
+                                            n s z
+                                          )
+                                ) (
+                                  (
+                                    lambda n. 
+                                      lambda s. 
+                                        lambda z. 
+                                          s (
+                                            n s z
+                                          )
+                                  ) (
+                                    lambda s. 
+                                      lambda z. 
+                                        z
+                                  )
+                                ) (
+                                  (
+                                    lambda p. 
+                                      p (
+                                        lambda t. 
+                                          lambda f. 
+                                            f
+                                      )
+                                  ) p
+                                )
+                              )
+                          ) (
+                            lambda b. 
+                              b (
+                                lambda s. 
+                                  lambda z. 
+                                    z
+                              ) (
+                                lambda s. 
+                                  lambda z. 
+                                    z
+                              )
+                          )
+                        )
+                    ) n
+                  )
+                )
+            ) (
+              lambda s. 
+                lambda z. 
+                  z
+            )
+      ) (
+        lambda y. 
+          x x y
+      )
+  ) y
+
+lambda t. 
+  lambda f. 
+    t
+

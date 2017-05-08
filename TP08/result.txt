@@ -1,0 +1,110 @@
+x = mem[0] : Ref Nat
+
+unit : Unit
+
+unit : Unit
+
+succ 0 : Nat
+
+f = lambda y : Ref Nat. 
+  mem[0] : (Ref Nat -> Ref Nat)
+
+g = mem[1] : Ref (Ref Nat -> Ref Nat)
+
+lambda y : Ref Nat. 
+  mem[0] : (Ref Nat -> Ref Nat)
+
+lambda y : Ref Nat. 
+  0 : (Ref Nat -> Nat)
+
+equal = lambda m : Nat. 
+  lambda n : Nat. 
+    if iszero m then 
+      if iszero n then 
+        true
+      else 
+        false
+    else 
+      if iszero n then 
+        false
+      else 
+        (
+          fix lambda equ : (Nat -> (Nat -> Bool)). 
+              lambda m : Nat. 
+                lambda n : Nat. 
+                  if iszero m then 
+                    if iszero n then 
+                      true
+                    else 
+                      false
+                  else 
+                    if iszero n then 
+                      false
+                    else 
+                      equ (
+                        pred m
+                      ) (
+                        pred n
+                      )
+        ) (
+          pred m
+        ) (
+          pred n
+        ) : (Nat -> (Nat -> Bool))
+
+new_array = lambda x : Unit. 
+  ref lambda n : Nat. 
+      0 : (Unit -> Ref (Nat -> Nat))
+
+lookup = lambda t : Ref (Nat -> Nat). 
+  lambda n : Nat. 
+    !t n : (Ref (Nat -> Nat) -> (Nat -> Nat))
+
+update = lambda t : Ref (Nat -> Nat). 
+  lambda m : Nat. 
+    lambda v : Nat. 
+      let oldt = !t
+      in
+        t := lambda n : Nat. 
+            if (
+                lambda m : Nat. 
+                  lambda n : Nat. 
+                    if iszero m then 
+                      if iszero n then 
+                        true
+                      else 
+                        false
+                    else 
+                      if iszero n then 
+                        false
+                      else 
+                        (
+                          fix lambda equ : (Nat -> (Nat -> Bool)). 
+                              lambda m : Nat. 
+                                lambda n : Nat. 
+                                  if iszero m then 
+                                    if iszero n then 
+                                      true
+                                    else 
+                                      false
+                                  else 
+                                    if iszero n then 
+                                      false
+                                    else 
+                                      equ (
+                                        pred m
+                                      ) (
+                                        pred n
+                                      )
+                        ) (
+                          pred m
+                        ) (
+                          pred n
+                        )
+              ) m n then 
+              v
+            else 
+              oldt n : (Ref (Nat -> Nat) -> (Nat -> (Nat -> Unit)))
+
+succ succ 0 : Nat
+

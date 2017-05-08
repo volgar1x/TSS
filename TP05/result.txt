@@ -1,0 +1,98 @@
+true : Bool
+
+if true then lambda b : Bool. 
+  b else false : terme mal typé (les branches d'un if doivent être de même type) !
+
+lambda y : Bool. 
+  y : (Bool -> Bool)
+
+tru = lambda t : Bool. 
+  lambda f : Bool. 
+    t : (Bool -> (Bool -> Bool))
+
+fls = lambda t : Bool. 
+  lambda f : Bool. 
+    f : (Bool -> (Bool -> Bool))
+
+realbool = lambda b : (Bool -> (Bool -> Bool)). 
+  b (
+    true
+  ) (
+    false
+  ) : ((Bool -> (Bool -> Bool)) -> Bool)
+
+true : Bool
+
+false : Bool
+
+cond = lambda b : (Bool -> (Bool -> Bool)). 
+  lambda t : Bool. 
+    lambda f : Bool. 
+      b t f : ((Bool -> (Bool -> Bool)) -> (Bool -> (Bool -> Bool)))
+
+true : Bool
+
+churchbool = lambda b : Bool. 
+  if b then lambda t : Bool. 
+    lambda f : Bool. 
+      t else lambda t : Bool. 
+    lambda f : Bool. 
+      f : (Bool -> (Bool -> (Bool -> Bool)))
+
+lambda t : Bool. 
+  lambda f : Bool. 
+    t : (Bool -> (Bool -> Bool))
+
+lambda t : Bool. 
+  lambda f : Bool. 
+    f : (Bool -> (Bool -> Bool))
+
+realnat = lambda m : ((Nat -> Nat) -> (Nat -> Nat)). 
+  m (
+    lambda x : Nat. 
+      succ x
+  ) (
+    0
+  ) : (((Nat -> Nat) -> (Nat -> Nat)) -> Nat)
+
+c2 = lambda s : (Nat -> Nat). 
+  lambda z : Nat. 
+    s (
+      s z
+    ) : ((Nat -> Nat) -> (Nat -> Nat))
+
+succ succ 0 : Nat
+
+c5 = lambda s : (Nat -> Nat). 
+  lambda z : Nat. 
+    s (
+      s (
+        s (
+          s (
+            s z
+          )
+        )
+      )
+    ) : ((Nat -> Nat) -> (Nat -> Nat))
+
+succ succ succ succ succ 0 : Nat
+
+(
+  lambda x : Bool. 
+    x
+) (
+  succ 0
+) : terme mal typé (paramètres réel et formel incompatibles) !
+
+(
+  lambda m : ((Nat -> Nat) -> (Nat -> Nat)). 
+    m (
+      lambda x : Nat. 
+        succ x
+    ) (
+      0
+    )
+) (
+  0
+) : terme mal typé (paramètres réel et formel incompatibles) !
+

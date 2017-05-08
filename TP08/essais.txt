@@ -1,0 +1,48 @@
+let x = ref 0 ;;
+
+let y = 0 in x := y ;;
+
+x := succ 0 ;;
+
+!x ;;
+
+let f = lambda y : Ref Nat. x ;;
+
+let g = ref f ;;
+
+!g ;;
+
+lambda y : Ref Nat. 0 ;;
+
+let equal = letrec equ : Nat -> Nat -> Bool =
+  lambda m : Nat.
+    lambda n : Nat.
+      if iszero m then
+        if iszero n then
+	  true
+        else
+          false
+      else
+        if iszero n then
+          false
+        else
+          equ (pred m) (pred n)
+in equ ;;
+
+let new_array = lambda x : Unit. ref (lambda n : Nat. 0) ;;
+
+let lookup = lambda t : Ref (Nat -> Nat). lambda n : Nat. (!t) n ;;
+
+let update = lambda t : Ref (Nat -> Nat). lambda m : Nat. lambda v : Nat.
+  let oldt = !t in
+    t := lambda n : Nat. if equal m n then v else oldt n
+;;
+
+let t = new_array unit
+in (
+  update t (succ (succ 0)) succ 0 ;
+  update t (succ 0) (succ (succ 0)) ;
+  update t 0 succ 0 ;
+  lookup t (succ 0)
+) ;;
+

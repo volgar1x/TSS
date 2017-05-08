@@ -1,0 +1,87 @@
+#### valeur unit et type Unit
+
+unit ;;
+
+(lambda x : Unit -> Unit. lambda y : Unit. x y) (lambda y : Unit. unit) unit ;;
+
+lambda x : Unit. lambda y : Unit. x ;;
+
+
+#### sequence (;)
+
+unit ; 0 ;;
+
+
+#### let
+
+let x = (lambda y : Nat. 0) in x ;;
+
+let x = 0 in (unit ; 0) ;;
+
+let fctAEffetDeBord = lambda x : Nat. 
+  # instructionAEffetDeBord
+  unit
+in
+  (fctAEffetDeBord 0 ; true) ;;
+
+
+#### enregistrements ({} et projection)
+
+{champ1 = 0, champ2 = succ 0} ;;
+
+let enreg = {champ1 = 0, champ2 = succ 0}
+in
+  enreg.champ2
+;;
+
+let enr1 = {val = 0, flag = false}
+in
+let enr2 = {val = succ 0, flag = true}
+in
+let combine = lambda v1 : {val : Nat, flag : Bool}.
+  lambda v2 : {val : Nat, flag : Bool}.
+    {flag = v2.flag, val = v1.val}
+in 
+  combine enr1 enr2
+;;
+
+
+#### types variants (<> et case of)
+
+let v1 = <bidon1 = true> as <bidon1 : Bool | bidon2 : Nat> ;;
+let v2 = <bidon2 = 0> as <bidon1 : Bool | bidon2 : Nat> ;;
+
+let fct_bidon = lambda v : <bidon1 : Bool | bidon2 : Nat>.
+  case v of
+    | <bidon1 = x1> => if x1 then 0 else succ 0
+    | <bidon2 = x2> => succ x2 
+;;
+
+fct_bidon v1 ;;
+fct_bidon v2 ;;
+
+let var = <machin = {chouette = false, chose = 0}>
+              as <truc : Nat | bidule : Nat | machin : {chouette : Bool, chose : Nat}>
+;;
+
+let f = lambda x : <truc : Nat | bidule : Nat | machin : {chouette : Bool, chose : Nat}>.
+  case x of
+    | <bidule = id> => succ id
+    | _ => 0
+;;
+
+f var ;;
+
+
+#### recursivite (letrec)
+
+letrec add : Nat -> Nat -> Nat =
+  lambda m : Nat.
+    lambda n : Nat.
+      if iszero m then
+        n
+      else
+        add (pred m) (succ n)
+in
+  add (succ (succ (succ 0))) (succ (succ 0))
+;;

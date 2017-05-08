@@ -1,0 +1,68 @@
+# c1
+lambda s. lambda z. s z ;;
+
+# successeur de zéro
+(lambda n. lambda s. lambda z. s (n s z)) lambda s. lambda z. z ;;
+
+# un terme non clos
+let bug = lambda x. (lambda y. x y) y ;;
+
+# un autre
+s ((lambda s. lambda z. z) s z) ;;
+
+# 1 + 2
+(lambda m. lambda n. lambda s. lambda z. m s (n s z))
+   (lambda s. lambda z. s z) (lambda s. lambda z. s (s z)) ;;
+
+let tru = lambda t. lambda f. t ;;
+
+let fls = lambda t. lambda f. f ;; 
+
+let and = lambda b1. lambda b2. b1 b2 fls;;
+
+let cond = lambda b. lambda t. lambda f. b t f ;;
+
+let pair = lambda f. lambda s. lambda b. b f s ;;
+
+let fst = lambda p. p tru ;;
+
+let snd = lambda p. p fls ;;
+
+let c0 = lambda s. lambda z. z ;;
+
+let c1 = lambda s. lambda z. s z ;;
+
+let c2 = lambda s. lambda z. s (s z) ;;
+
+let c3 = lambda s. lambda z. s (s (s z)) ;;
+
+let scc = lambda n. lambda s. lambda z. s (n s z) ;;
+
+let iszro = lambda m. m (lambda x. fls) tru ;;
+
+let plus = lambda m. lambda n. lambda s. lambda z. m s (n s z) ;;
+
+let times = lambda m. lambda n. m (plus n) c0 ;;
+
+let zz = pair c0 c0 ;;
+
+let ss = lambda p. pair (snd p) (plus (scc c0) (snd p)) ;;
+
+let prd = lambda m. fst (m ss zz) ;;
+
+let equal = lambda m. lambda n. and (iszro (m prd n)) (iszro (n prd m)) ;;
+
+equal (scc c0) c1 ;;
+
+equal (plus c1 c2 ) c3 ;;
+
+# fact 3
+let f = lambda fct. lambda n. 
+	cond (iszro n) (lambda x. c1) (lambda x. times n (fct (prd n))) c0 ;;
+
+let z = lambda f. lambda y. (lambda x. f (lambda y. x x y)) (lambda x. f (lambda y. x x y)) y ;;
+
+let fact = z f ;;
+
+equal (fact c3) (times c2 c3) ;;
+

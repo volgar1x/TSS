@@ -1,0 +1,48 @@
+# Une petite exception pour commencer
+
+raise Nat_expected unit ;;
+
+
+# Dans un let maintenant
+
+let f = if true then 0 else (raise Nat_expected unit)
+in
+  f
+;;
+
+let f = if false then 0 else (raise Nat_expected unit)
+in
+  f
+;;
+
+
+# Dans une fonction et on essaie de l'attraper (mais elle ne survient pas)
+
+let f = lambda n : Nat. if iszero n then (raise Pred_0 n) else pred n
+in
+  try f (succ succ 0) with Pred_0 exc -> 0
+;;
+
+
+# Cette fois l'exception est levée, on l'attrape et on la traite
+
+let f = lambda n : Nat. if iszero n then (raise Pred_0 n) else pred n
+in
+  try f 0 with Pred_0 exc -> 0
+;;
+
+
+# Maintenant, l'exception est levée, mais on ne l'attrape pas. Elle se propage.
+
+let f = lambda n : Nat. if iszero n then (raise Pred_0 n) else pred n
+in
+  try f 0 with Nat_expected exc -> 0
+;;
+
+
+# Enfin, l'exception est levée, et on n'essaie même pas de l'attraper.
+
+let f = lambda n : Nat. if iszero n then (raise Pred_0 n) else pred n
+in
+  f 0
+;;
