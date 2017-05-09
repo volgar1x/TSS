@@ -46,6 +46,7 @@ type expression = Variable of string
                 | Unit
                 | Cond of expression * expression * expression
                 | Each of expression * expression
+                | Record of ((string * expression) list)
                 ;;
 
 let rec expression_to_string = function
@@ -60,6 +61,7 @@ let rec expression_to_string = function
   | Unit -> "unit"
   | Cond (c, t, e) -> "if " ^ (expression_to_string c) ^ " then " ^ (expression_to_string t) ^ " else " ^ (expression_to_string e)
   | Each (a, b) -> (expression_to_string a) ^ " ; " ^ (expression_to_string b)
+  | Record xs -> Assoc.to_string expression_to_string xs
 ;;
 
 let rec expression_is_value = function
@@ -68,6 +70,7 @@ let rec expression_is_value = function
   | Boolean _ -> true
   | Natural _ -> true
   | Unit -> true
+  | Record xs -> List.for_all (fun (k, v) -> expression_is_value v) xs
   | _ -> false
 ;;
 
@@ -81,6 +84,7 @@ let expression_variable x v t =
   | Application (t1, t2) -> Application (aux t1, aux t2)
   | Global (x', t) -> Global (x', aux t)
   | Cond (c, t, e) -> Cond (aux c, aux t, aux e)
+  | Record xs -> Record (List.map (fun (k, v) -> (k, aux v)) xs)
 
   | t -> t
   in

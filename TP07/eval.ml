@@ -56,6 +56,7 @@ let rec eval_step delta = function
   let (_, c') = eval_step delta c in
   (delta, Cond (c', t, e))
 
+(* E-Seq *)
 | Each (a, b) when expression_is_value a ->
   (delta, b)
 | Each (a, b) ->

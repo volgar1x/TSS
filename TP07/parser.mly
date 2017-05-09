@@ -5,7 +5,10 @@
 %token Leol
 %token Loparen
 %token Lcparen
+%token Lobrack
+%token Lcbrack
 %token Llambda
+%token Lcomma
 %token Ldot
 %token Lcolon
 %token Larrow
@@ -27,6 +30,7 @@
 %start line
 %type <Expression.expression> line
 %type <Expression.type_> type
+%type <(string * Expression.expression) list> recordlist
 
 %%
 
@@ -49,12 +53,13 @@ expr1 :
 ;
 
 expr2 :
-      | Lident               { Variable ($1) }
-      | Ltrue                { Boolean (true) }
-      | Lfalse               { Boolean (false) }
-      | Linteger             { Natural (int_of_string $1) }
-      | Lunit                { Unit }
-      | Loparen expr Lcparen { $2 }
+      | Lident                     { Variable ($1) }
+      | Ltrue                      { Boolean (true) }
+      | Lfalse                     { Boolean (false) }
+      | Linteger                   { Natural (int_of_string $1) }
+      | Lunit                      { Unit }
+      | Lobrack recordlist Lcbrack { Record ($2) }
+      | Loparen expr Lcparen       { $2 }
 ;
 
 type :
@@ -65,6 +70,16 @@ type :
 type1 :
       | Lident               { type_of_string $1 }
       | Loparen type Lcparen { $2 }
+;
+
+recordlist :
+           | Lident Leq expr recordlist2 { ($1, $3) :: $4 }
+           |                             { [] }
+;
+
+recordlist2 :
+            | Lcomma recordlist { $2 }
+            |                   { [] }
 ;
 
 %%

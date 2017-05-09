@@ -20,7 +20,7 @@ let put key value xs =
 let to_string f xs =
   "{" ^
     (String.concat ", " (
-      List.map (fun (key, value) -> key ^ ": " ^ (f value))
+      List.map (fun (key, value) -> key ^ " = " ^ (f value))
                xs
     )) ^
   "}"

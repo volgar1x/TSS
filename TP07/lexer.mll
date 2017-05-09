@@ -27,7 +27,10 @@ rule lexer = parse
 
   | "("                                                 {Loparen}
   | ")"                                                 {Lcparen}
+  | "{"                                                 {Lobrack}
+  | "}"                                                 {Lcbrack}
   | "lambda"                                            {Llambda}
+  | ","                                                 {Lcomma}
   | "."                                                 {Ldot}
   | ":"                                                 {Lcolon}
   | "->"                                                {Larrow}
