@@ -53,8 +53,11 @@ type expression = Variable of string
                 | Record of ((string * expression) list)
                 | Proj of string * string
                 | Variant of string * expression * type_
-                | Case of expression * ((string * string * expression) list)
-                ;;
+                | Case of expression * (variant list)
+
+and variant = VariantCase of string * string * expression
+            | VariantFallthrough of expression
+;;
 
 let rec expression_to_string = function
   | Variable var -> var
@@ -71,7 +74,14 @@ let rec expression_to_string = function
   | Record xs -> Assoc.to_string expression_to_string xs
   | Proj (self, f) -> self ^ "." ^ f
   | Variant (f, t, ty) -> "<" ^ f ^ " = " ^ (expression_to_string t) ^ "> as " ^ (string_of_type ty)
-  | Case (t, cases) -> "case " ^ (expression_to_string t) ^ " of " ^ (String.concat " | " (List.map (fun (f, x, t2) -> "<" ^ f ^ " = " ^ x ^ "> => " ^ (expression_to_string t2)) cases))
+
+  | Case (t, cases) ->
+    "case " ^ (expression_to_string t) ^ " of " ^
+      (String.concat " | "
+        (List.map
+          (function VariantCase (f, x, t2) -> "<" ^ f ^ " = " ^ x ^ "> => " ^ (expression_to_string t2)
+                  | VariantFallthrough t2 -> "_ => " ^ (expression_to_string t2))
+          cases))
 ;;
 
 let rec expression_is_value = function
@@ -97,7 +107,10 @@ let expression_variable x v t =
   | Cond (c, t, e) -> Cond (aux c, aux t, aux e)
   | Record xs -> Record (List.map (fun (k, v) -> (k, aux v)) xs)
   | Variant (f, t, ty) -> Variant (f, aux t, ty)
-  | Case (t, cases) -> Case (aux t, List.map (fun (f, x, t2) -> (f, x, aux t2)) cases)
+  | Case (t, cases) -> Case (aux t, List.map (function
+                                              | VariantCase (f, x, t2) -> VariantCase (f, x, aux t2)
+                                              | VariantFallthrough t2 -> VariantFallthrough (aux t2))
+                                             cases)
 
   | t -> t
   in

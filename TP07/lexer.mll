@@ -53,5 +53,7 @@ rule lexer = parse
   | "as"                                                {Las}
   | "case"                                              {Lcase}
   | "of"                                                {Lof}
-  | ['a'-'z' 'A'-'Z'] ['a'-'z' 'A'-'Z' '0'-'9']*        {Lident (Lexing.lexeme lexbuf)}
-  | ['0'-'9']+                                          {Linteger (Lexing.lexeme lexbuf)}
+  | "_"                                                 {Lunderscore}
+
+  | ['0'-'9']+                                              {Linteger (Lexing.lexeme lexbuf)}
+  | ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '_' '0'-'9']*    {Lident (Lexing.lexeme lexbuf)}

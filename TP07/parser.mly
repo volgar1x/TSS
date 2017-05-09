@@ -33,6 +33,7 @@
 %token Las
 %token Lcase
 %token Lof
+%token Lunderscore
 
 %start line
 %type <Expression.expression> line
@@ -108,7 +109,8 @@ typerecordlist2 :
 ;
 
 variant :
-        | Loangle Lident Leq Lident Lcangle Lfatarrow expr { ($2, $4, $7) }
+        | Loangle Lident Leq Lident Lcangle Lfatarrow expr { VariantCase ($2, $4, $7) }
+        | Lunderscore Lfatarrow expr                       { VariantFallthrough ($3) }
 ;
 
 variantlist :
