@@ -15,18 +15,33 @@ let type_of_string = function
   | n -> Name n
 ;;
 
-let rec type_equal a b =
-  match a with
-  | Apply (aa, ab) ->
+let rec type_record_equal left right =
+  List.for_all (fun (f1, ty1) ->
+    List.exists (fun (f2, ty2) ->
+      String.equal f1 f2 && type_equal ty1 ty2
+    ) left
+  ) right
 
-    (match b with
+and type_equal a b =
+  match a with
+  | Record xs1 ->
+    begin match b with
+    | Record xs2 -> type_record_equal xs1 xs2
+    | _ -> false
+    end
+
+  | Apply (aa, ab) ->
+    begin match b with
     | Apply (ba, bb) -> (type_equal aa ba) && (type_equal ab bb)
-    | _ -> false)
+    | _ -> false
+    end
 
   | _ ->
-    (match b with
+    begin match b with
     | Apply _ -> false
-    | _ -> a == b)
+    | Record _ -> false
+    | _ -> a == b
+    end
 ;;
 
 let rec string_of_type = function

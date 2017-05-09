@@ -30,6 +30,22 @@ let rec type_of_expression gamma = function
     (gamma, rty)
   | _ -> raise (Type_error ("cannot apply " ^ (expression_to_string t1))))
 
+| Record xs ->
+  let xs' = List.map
+    (fun (f, t) ->
+      let (_, ty) = type_of_expression gamma t in
+      (f, ty)
+    )
+    xs in
+  (gamma, Record xs')
+
+| Proj (self, f) ->
+  let ty = Assoc.get self gamma in
+  begin match ty with
+  | Record xs -> (gamma, Assoc.get f xs)
+  | _ -> raise (Type_error ("cannot access field `" ^ f ^ "' on " ^ (string_of_type ty)))
+  end
+
 | Global (x, t) ->
   let (_, tty) = type_of_expression gamma t in
   (Assoc.put x tty gamma, tty)
