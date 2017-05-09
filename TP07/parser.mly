@@ -7,11 +7,15 @@
 %token Lcparen
 %token Lobrack
 %token Lcbrack
+%token Loangle
+%token Lcangle
+%token Lbar
 %token Llambda
 %token Lcomma
 %token Ldot
 %token Lcolon
 %token Larrow
+%token Lfatarrow
 %token Lglobal
 %token Leq
 %token <string> Lident
@@ -26,11 +30,17 @@
 %token Lend
 %token Lcolon
 %token Lunit
+%token Las
+%token Lcase
+%token Lof
 
 %start line
 %type <Expression.expression> line
 %type <Expression.type_> type
 %type <(string * Expression.expression) list> recordlist
+/*%type <(string * Expression.type) list> typerecordlist*/
+/*%type <(string * string * Expression.expression) list> variantlist*/
+/*%type <(string * Expression.type) list> typevariantlist*/
 
 %%
 
@@ -39,12 +49,14 @@ line :
 ;
 
 expr :
-     | Llet Lident Leq expr Lin expr           {Local ($2, $4, $6)}
-     | Llet Lident Leq expr                    {Global ($2, $4)}
-     | Llambda Lident Lcolon type Ldot expr    {Function ($2, $4, $6)}
-     | Lif expr Lthen expr Lelse expr          {Cond ($2, $4, $6)}
-     | expr1                                   {$1}
-     | expr Lcolon expr                        {Each ($1, $3)}
+     | Llet Lident Leq expr Lin expr                                       {Local ($2, $4, $6)}
+     | Llet Lident Leq expr                                                {Global ($2, $4)}
+     | Llambda Lident Lcolon type Ldot expr                                {Function ($2, $4, $6)}
+     | Lif expr Lthen expr Lelse expr                                      {Cond ($2, $4, $6)}
+     | Loangle Lident Leq expr Lcangle Las Loangle typevariantlist Lcangle {Variant ($2, $4, Variant ($8))}
+     | Lcase expr Lof variantlist                                          {Case  ($2, $4)}
+     | expr1                                                               {$1}
+     | expr Lcolon expr                                                    {Each ($1, $3)}
 ;
 
 expr1 :
@@ -64,18 +76,19 @@ expr2 :
 ;
 
 type :
-     | type1 Larrow type     { Apply ($1, $3) }
-     | type1                  { $1 }
+     | type1 Larrow type           { Apply ($1, $3) }
+     | type1                       { $1 }
 ;
 
 type1 :
-      | Lident                         { type_of_string $1 }
-      | Loparen type Lcparen           { $2 }
-      | Lobrack typerecordlist Lcbrack { Record $2 }
+      | Lident                          { type_of_string $1 }
+      | Loparen type Lcparen            { $2 }
+      | Lobrack typerecordlist Lcbrack  { Record $2 }
+      | Loangle typevariantlist Lcangle { Variant ($2) }
 ;
 
 recordlist :
-           | Lident Leq expr recordlist2 { ($1, $3) :: $4 }
+           | Lident Leq expr recordlist2 { Assoc.put $1 $3 $4 }
            |                             { [] }
 ;
 
@@ -85,13 +98,32 @@ recordlist2 :
 ;
 
 typerecordlist :
-           | Lident Lcolon type typerecordlist2 { ($1, $3) :: $4 }
+           | Lident Lcolon type typerecordlist2 { Assoc.put $1 $3 $4 }
            |                                    { [] }
 ;
 
 typerecordlist2 :
             | Lcomma typerecordlist { $2 }
             |                       { [] }
+;
+
+variant :
+        | Loangle Lident Leq Lident Lcangle Lfatarrow expr { ($2, $4, $7) }
+;
+
+variantlist :
+            | { [] }
+            | Lbar variant variantlist { $2 :: $3 }
+;
+
+typevariantlist :
+                | Lident Lcolon type typevariantlist2 { Assoc.put $1 $3 $4 }
+                |                                     { [] }
+;
+
+typevariantlist2 :
+                 | Lbar typevariantlist { $2 }
+                 |                      { [] }
 ;
 
 %%

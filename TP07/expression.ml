@@ -4,6 +4,7 @@ type type_ = Boolean
            | Apply of type_ * type_
            | Name of string
            | Record of ((string * type_) list)
+           | Variant of ((string * type_) list)
            ;;
 
 let type_of_string = function
@@ -33,6 +34,7 @@ let rec string_of_type = function
   | Natural -> "Nat"
   | Unit -> "Unit"
   | Record xs -> Assoc.to_string ~kv:" : " string_of_type xs
+  | Variant xs -> Assoc.to_string ~start:"<" ~stop:">" ~kv:" : " ~sep:" | " string_of_type xs
   | Apply (a, b) -> "(" ^ (string_of_type a) ^ " -> " ^ (string_of_type b) ^ ")"
   | Name n -> "^" ^ n
 ;;
@@ -50,6 +52,8 @@ type expression = Variable of string
                 | Each of expression * expression
                 | Record of ((string * expression) list)
                 | Proj of string * string
+                | Variant of string * expression * type_
+                | Case of expression * ((string * string * expression) list)
                 ;;
 
 let rec expression_to_string = function
@@ -66,6 +70,8 @@ let rec expression_to_string = function
   | Each (a, b) -> (expression_to_string a) ^ " ; " ^ (expression_to_string b)
   | Record xs -> Assoc.to_string expression_to_string xs
   | Proj (self, f) -> self ^ "." ^ f
+  | Variant (f, t, ty) -> "<" ^ f ^ " = " ^ (expression_to_string t) ^ "> as " ^ (string_of_type ty)
+  | Case (t, cases) -> "case " ^ (expression_to_string t) ^ " of " ^ (String.concat " | " (List.map (fun (f, x, t2) -> "<" ^ f ^ " = " ^ x ^ "> => " ^ (expression_to_string t2)) cases))
 ;;
 
 let rec expression_is_value = function
@@ -75,6 +81,7 @@ let rec expression_is_value = function
   | Natural _ -> true
   | Unit -> true
   | Record xs -> List.for_all (fun (k, v) -> expression_is_value v) xs
+  | Variant (_, t, _) -> expression_is_value t
   | _ -> false
 ;;
 
@@ -89,6 +96,8 @@ let expression_variable x v t =
   | Global (x', t) -> Global (x', aux t)
   | Cond (c, t, e) -> Cond (aux c, aux t, aux e)
   | Record xs -> Record (List.map (fun (k, v) -> (k, aux v)) xs)
+  | Variant (f, t, ty) -> Variant (f, aux t, ty)
+  | Case (t, cases) -> Case (aux t, List.map (fun (f, x, t2) -> (f, x, aux t2)) cases)
 
   | t -> t
   in

@@ -17,13 +17,13 @@ let put key value xs =
   aux [] xs
 ;;
 
-let to_string ?sep:(sep=", ") ?kv:(kv=" = ") f xs =
-  "{" ^
+let to_string ?start:(start="{") ?stop:(stop="}") ?sep:(sep=", ") ?kv:(kv=" = ") f xs =
+  start ^
     (String.concat sep (
       List.map (fun (key, value) -> key ^ kv ^ (f value))
                xs
     )) ^
-  "}"
+  stop
 ;;
 
 let keys_to_string xs =

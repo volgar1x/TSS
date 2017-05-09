@@ -29,11 +29,15 @@ rule lexer = parse
   | ")"                                                 {Lcparen}
   | "{"                                                 {Lobrack}
   | "}"                                                 {Lcbrack}
+  | "<"                                                 {Loangle}
+  | ">"                                                 {Lcangle}
+  | "|"                                                 {Lbar}
   | "lambda"                                            {Llambda}
   | ","                                                 {Lcomma}
   | "."                                                 {Ldot}
   | ":"                                                 {Lcolon}
   | "->"                                                {Larrow}
+  | "=>"                                                {Lfatarrow}
   | "global"                                            {Lglobal}
   | "="                                                 {Leq}
   | "true"                                              {Ltrue}
@@ -46,5 +50,8 @@ rule lexer = parse
   | ";;"                                                {Lend}
   | ";"                                                 {Lcolon}
   | "unit"                                              {Lunit}
+  | "as"                                                {Las}
+  | "case"                                              {Lcase}
+  | "of"                                                {Lof}
   | ['a'-'z' 'A'-'Z'] ['a'-'z' 'A'-'Z' '0'-'9']*        {Lident (Lexing.lexeme lexbuf)}
   | ['0'-'9']+                                          {Linteger (Lexing.lexeme lexbuf)}
