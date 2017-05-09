@@ -3,6 +3,7 @@ type type_ = Boolean
            | Unit
            | Apply of type_ * type_
            | Name of string
+           | Record of ((string * type_) list)
            ;;
 
 let type_of_string = function
@@ -31,6 +32,7 @@ let rec string_of_type = function
   | Boolean -> "Bool"
   | Natural -> "Nat"
   | Unit -> "Unit"
+  | Record xs -> Assoc.to_string ~kv:" : " string_of_type xs
   | Apply (a, b) -> "(" ^ (string_of_type a) ^ " -> " ^ (string_of_type b) ^ ")"
   | Name n -> "^" ^ n
 ;;
@@ -47,6 +49,7 @@ type expression = Variable of string
                 | Cond of expression * expression * expression
                 | Each of expression * expression
                 | Record of ((string * expression) list)
+                | Proj of string * string
                 ;;
 
 let rec expression_to_string = function
@@ -62,6 +65,7 @@ let rec expression_to_string = function
   | Cond (c, t, e) -> "if " ^ (expression_to_string c) ^ " then " ^ (expression_to_string t) ^ " else " ^ (expression_to_string e)
   | Each (a, b) -> (expression_to_string a) ^ " ; " ^ (expression_to_string b)
   | Record xs -> Assoc.to_string expression_to_string xs
+  | Proj (self, f) -> self ^ "." ^ f
 ;;
 
 let rec expression_is_value = function

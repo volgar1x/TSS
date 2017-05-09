@@ -53,6 +53,7 @@ expr1 :
 ;
 
 expr2 :
+      | Lident Ldot Lident         { Proj ($1, $3) }
       | Lident                     { Variable ($1) }
       | Ltrue                      { Boolean (true) }
       | Lfalse                     { Boolean (false) }
@@ -68,8 +69,9 @@ type :
 ;
 
 type1 :
-      | Lident               { type_of_string $1 }
-      | Loparen type Lcparen { $2 }
+      | Lident                         { type_of_string $1 }
+      | Loparen type Lcparen           { $2 }
+      | Lobrack typerecordlist Lcbrack { Record $2 }
 ;
 
 recordlist :
@@ -80,6 +82,16 @@ recordlist :
 recordlist2 :
             | Lcomma recordlist { $2 }
             |                   { [] }
+;
+
+typerecordlist :
+           | Lident Lcolon type typerecordlist2 { ($1, $3) :: $4 }
+           |                                    { [] }
+;
+
+typerecordlist2 :
+            | Lcomma typerecordlist { $2 }
+            |                       { [] }
 ;
 
 %%

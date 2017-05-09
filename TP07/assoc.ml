@@ -17,10 +17,10 @@ let put key value xs =
   aux [] xs
 ;;
 
-let to_string f xs =
+let to_string ?sep:(sep=", ") ?kv:(kv=" = ") f xs =
   "{" ^
-    (String.concat ", " (
-      List.map (fun (key, value) -> key ^ " = " ^ (f value))
+    (String.concat sep (
+      List.map (fun (key, value) -> key ^ kv ^ (f value))
                xs
     )) ^
   "}"
