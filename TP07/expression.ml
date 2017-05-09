@@ -22,11 +22,24 @@ let rec type_record_equal left right =
     ) left
   ) right
 
+and type_variant_equal left right =
+  List.for_all (fun (f1, ty1) ->
+    List.exists (fun (f2, ty2) ->
+      String.equal f1 f2 && type_equal ty1 ty2
+    ) left
+  ) right
+
 and type_equal a b =
   match a with
   | Record xs1 ->
     begin match b with
     | Record xs2 -> type_record_equal xs1 xs2
+    | _ -> false
+    end
+
+  | Variant xs1 ->
+    begin match b with
+    | Variant xs2 -> type_variant_equal xs1 xs2
     | _ -> false
     end
 
@@ -40,6 +53,7 @@ and type_equal a b =
     begin match b with
     | Apply _ -> false
     | Record _ -> false
+    | Variant _ -> false
     | _ -> a == b
     end
 ;;

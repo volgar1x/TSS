@@ -46,6 +46,39 @@ let rec type_of_expression gamma = function
   | _ -> raise (Type_error ("cannot access field `" ^ f ^ "' on " ^ (string_of_type ty)))
   end
 
+| Variant (x, t, ty) ->
+  (gamma, ty)
+
+| Case (t, cases) ->
+  let (_, ty) = type_of_expression gamma t in
+
+  let results = List.map (function
+    | VariantCase (f, x, t2) ->
+      let xty = match ty with
+        | Variant xs ->
+          begin match Assoc.find f xs with
+          | Some xty -> xty
+          | None -> raise (Type_error ("type " ^ (string_of_type ty) ^ " hasnt any variant " ^ f))
+          end
+
+        | _ ->
+          raise (Type_error ("cannot match on " ^ (string_of_type ty)))
+      in
+      let (_, t2ty) = type_of_expression (Assoc.put x xty gamma) t2 in
+      t2ty
+    | VariantFallthrough t2 ->
+      let (_, t2ty) = type_of_expression gamma t2 in
+      t2ty
+  ) cases in
+
+  if not (MoreList.allsame type_equal results) then
+    raise (Type_error "");
+
+  begin match results with
+  | [] -> (gamma, Unit)
+  | hd :: _ -> (gamma, hd)
+  end
+
 | Global (x, t) ->
   let (_, tty) = type_of_expression gamma t in
   (Assoc.put x tty gamma, tty)
