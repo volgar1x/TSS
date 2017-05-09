@@ -41,6 +41,7 @@ rule lexer = parse
   | "let"                                               {Llet}
   | "in"                                                {Lin}
   | ";;"                                                {Lend}
+  | ";"                                                 {Lcolon}
   | "unit"                                              {Lunit}
   | ['a'-'z' 'A'-'Z'] ['a'-'z' 'A'-'Z' '0'-'9']*        {Lident (Lexing.lexeme lexbuf)}
   | ['0'-'9']+                                          {Linteger (Lexing.lexeme lexbuf)}

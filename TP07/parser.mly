@@ -21,6 +21,7 @@
 %token Llet
 %token Lin
 %token Lend
+%token Lcolon
 %token Lunit
 
 %start line
@@ -38,6 +39,7 @@ expr :
      | Llambda Lident Lcolon type Ldot expr    {Function ($2, $4, $6)}
      | Lif expr Lthen expr Lelse expr          {Cond ($2, $4, $6)}
      | expr1                                   {$1}
+     | expr Lcolon expr                        {Each ($1, $3)}
 ;
 
 expr1 :

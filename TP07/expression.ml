@@ -44,6 +44,7 @@ type expression = Variable of string
                 | Natural of int
                 | Unit
                 | Cond of expression * expression * expression
+                | Each of expression * expression
                 ;;
 
 let rec expression_to_string = function
@@ -56,6 +57,7 @@ let rec expression_to_string = function
   | Natural n -> string_of_int n
   | Unit -> "unit"
   | Cond (c, t, e) -> "if " ^ (expression_to_string c) ^ " then " ^ (expression_to_string t) ^ " else " ^ (expression_to_string e)
+  | Each (a, b) -> (expression_to_string a) ^ " ; " ^ (expression_to_string b)
 ;;
 
 let rec expression_is_value = function

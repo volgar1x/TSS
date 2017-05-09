@@ -34,6 +34,10 @@ let rec type_of_expression gamma = function
   let (_, tty) = type_of_expression gamma t in
   (Assoc.put x tty gamma, tty)
 
+| Each (a, b) ->
+  let (gamma', _) = type_of_expression gamma a in
+  type_of_expression gamma' b
+
 | Variable "succ" -> (gamma, Apply (Natural, Natural))
 | Variable x -> (gamma, Assoc.get x gamma)
 

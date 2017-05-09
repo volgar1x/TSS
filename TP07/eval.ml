@@ -47,6 +47,12 @@ let rec eval_step delta = function
   let (_, c') = eval_step delta c in
   (delta, Cond (c', t, e))
 
+| Each (a, b) when expression_is_value a ->
+  (delta, b)
+| Each (a, b) ->
+  let (_, a') = eval_step delta a in
+  (delta, Each (a', b))
+
 | v when expression_is_value v ->
   (delta, v)
 
