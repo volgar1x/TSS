@@ -38,7 +38,7 @@ rule lexer = parse
   | ":"                                                 {Lcolon}
   | "->"                                                {Larrow}
   | "=>"                                                {Lfatarrow}
-  | "global"                                            {Lglobal}
+  | "letrec"                                            {Lletrec}
   | "="                                                 {Leq}
   | "true"                                              {Ltrue}
   | "false"                                             {Lfalse}

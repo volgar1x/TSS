@@ -42,6 +42,7 @@ let rec string_of_type = function
 type expression = Variable of string
                 | Function of string * type_ * expression
                 | NativeFunction of string * type_ * type_ * (((string * expression) list) -> expression -> (((string * expression) list) * expression))
+                | DefineRecFunc of string * type_ * expression * expression
                 | Application of expression * expression
                 | Global of string * expression
                 | Local of string * expression * expression
@@ -63,6 +64,7 @@ let rec expression_to_string = function
   | Variable var -> var
   | Function (var, ty, body) -> "λ" ^ var ^  " : " ^ (string_of_type ty) ^ ". " ^ (expression_to_string body)
   | NativeFunction (f, ty, rty, _) -> "λx : " ^ (string_of_type ty) ^ ". [native/" ^ f ^ " : " ^ (string_of_type rty) ^ "]"
+  | DefineRecFunc (x, ty, t, rest) -> "letrec " ^ x ^ " : " ^ (string_of_type ty) ^ " = " ^ (expression_to_string t) ^ " in " ^ (expression_to_string rest)
   | Application (left, right) -> "(" ^ (expression_to_string left) ^ " " ^ (expression_to_string right) ^ ")"
   | Global (varname, varexpr) -> "let " ^ varname ^ " = " ^ (expression_to_string varexpr) ^ " ;; "
   | Local (varname, varexpr, body) -> "let " ^ varname ^ " = " ^ (expression_to_string varexpr) ^ " in " ^ (expression_to_string body)
