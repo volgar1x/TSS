@@ -40,6 +40,7 @@ type expression = Variable of string
                 | NativeFunction of string * type_ * type_ * (((string * expression) list) -> expression -> (((string * expression) list) * expression))
                 | Application of expression * expression
                 | Global of string * expression
+                | Local of string * expression * expression
                 | Boolean of bool
                 | Natural of int
                 | Unit
@@ -53,6 +54,7 @@ let rec expression_to_string = function
   | NativeFunction (f, ty, rty, _) -> "λx : " ^ (string_of_type ty) ^ ". [native/" ^ f ^ " : " ^ (string_of_type rty) ^ "]"
   | Application (left, right) -> "(" ^ (expression_to_string left) ^ " " ^ (expression_to_string right) ^ ")"
   | Global (varname, varexpr) -> "let " ^ varname ^ " = " ^ (expression_to_string varexpr) ^ " ;; "
+  | Local (varname, varexpr, body) -> "let " ^ varname ^ " = " ^ (expression_to_string varexpr) ^ " in " ^ (expression_to_string body)
   | Boolean b -> if b then "true" else "false"
   | Natural n -> string_of_int n
   | Unit -> "unit"

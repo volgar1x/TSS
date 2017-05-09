@@ -38,6 +38,15 @@ let rec eval_step delta = function
   let v = Assoc.get var delta in
   (delta, v)
 
+(* E-LetIn *)
+| Local (x, v, t) when expression_is_value v ->
+  let delta' = Assoc.put x v delta in
+  let (_, t') = eval_step delta' t in
+  (delta, t')
+| Local (x, t1, t2) ->
+  let (_, t1') = eval_step delta t1 in
+  (delta, Local (x, t1', t2))
+
 (* E-If *)
 | Cond (Boolean true, t, _) ->
   eval_step delta t

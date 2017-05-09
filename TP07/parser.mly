@@ -35,6 +35,7 @@ line :
 ;
 
 expr :
+     | Llet Lident Leq expr Lin expr           {Local ($2, $4, $6)}
      | Llet Lident Leq expr                    {Global ($2, $4)}
      | Llambda Lident Lcolon type Ldot expr    {Function ($2, $4, $6)}
      | Lif expr Lthen expr Lelse expr          {Cond ($2, $4, $6)}

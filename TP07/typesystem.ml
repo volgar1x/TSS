@@ -34,6 +34,12 @@ let rec type_of_expression gamma = function
   let (_, tty) = type_of_expression gamma t in
   (Assoc.put x tty gamma, tty)
 
+| Local (x, t1, t2) ->
+  let (_, t1ty) = type_of_expression gamma t1 in
+  let gamma' = Assoc.put x t1ty gamma in
+  let (_, t2ty) = type_of_expression gamma' t2 in
+  (gamma, t2ty)
+
 | Each (a, b) ->
   let (gamma', _) = type_of_expression gamma a in
   type_of_expression gamma' b
