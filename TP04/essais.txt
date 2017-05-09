@@ -1,8 +1,10 @@
 # c1
 lambda s. lambda z. s z ;;
 
+a b c d ;;
+
 # successeur de zéro
-(lambda n. lambda s. lambda z. s (n s z)) lambda s. lambda z. z ;;
+(lambda n. lambda s. lambda z. s (n s z)) (lambda s. lambda z. z) ;;
 
 # un terme non clos
 let bug = lambda x. (lambda y. x y) y ;;
@@ -16,7 +18,7 @@ s ((lambda s. lambda z. z) s z) ;;
 
 let tru = lambda t. lambda f. t ;;
 
-let fls = lambda t. lambda f. f ;; 
+let fls = lambda t. lambda f. f ;;
 
 let and = lambda b1. lambda b2. b1 b2 fls;;
 
@@ -57,7 +59,7 @@ equal (scc c0) c1 ;;
 equal (plus c1 c2 ) c3 ;;
 
 # fact 3
-let f = lambda fct. lambda n. 
+let f = lambda fct. lambda n.
 	cond (iszro n) (lambda x. c1) (lambda x. times n (fct (prd n))) c0 ;;
 
 let z = lambda f. lambda y. (lambda x. f (lambda y. x x y)) (lambda x. f (lambda y. x x y)) y ;;
@@ -65,4 +67,3 @@ let z = lambda f. lambda y. (lambda x. f (lambda y. x x y)) (lambda x. f (lambda
 let fact = z f ;;
 
 equal (fact c3) (times c2 c3) ;;
-
