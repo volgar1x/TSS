@@ -3,7 +3,10 @@ true ;;
 # un terme mal typé
 if true then lambda b : Bool. b else false ;;
 
-(lambda x : Bool -> Bool. x) lambda y : Bool. y ;;
+# une terme bien typé
+if true then false else true ;;
+
+(lambda x : Bool -> Bool. x) (lambda y : Bool. y) ;;
 
 let tru = lambda t : bool. lambda f : bool. t ;;
 
@@ -17,7 +20,7 @@ realbool tru ;;
 realbool fls ;;
 
 let cond = lambda b : bool -> bool -> bool.
-	   lambda t : bool. 
+	   lambda t : bool.
 	       lambda f : bool. b t f ;;
 
 cond tru true false ;;
@@ -45,3 +48,4 @@ realnat c5 ;;
 # et un autre
 realnat 0 ;;
 
+succ ;;
