@@ -21,6 +21,7 @@
 %token Llet
 %token Lin
 %token Lend
+%token Lunit
 
 %start line
 %type <Expression.expression> line
@@ -49,6 +50,7 @@ expr2 :
       | Ltrue                { Boolean (true) }
       | Lfalse               { Boolean (false) }
       | Linteger             { Natural (int_of_string $1) }
+      | Lunit                { Unit }
       | Loparen expr Lcparen { $2 }
 ;
 

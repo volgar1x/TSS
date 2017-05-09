@@ -1,5 +1,6 @@
 type type_ = Boolean
            | Natural
+           | Unit
            | Apply of type_ * type_
            | Name of string
            ;;
@@ -8,6 +9,7 @@ let type_of_string = function
   | "Bool" -> Boolean
   | "bool" -> Boolean
   | "Nat" -> Natural
+  | "Unit" -> Unit
   | n -> Name n
 ;;
 
@@ -28,6 +30,7 @@ let rec type_equal a b =
 let rec string_of_type = function
   | Boolean -> "Bool"
   | Natural -> "Nat"
+  | Unit -> "Unit"
   | Apply (a, b) -> "(" ^ (string_of_type a) ^ " -> " ^ (string_of_type b) ^ ")"
   | Name n -> "^" ^ n
 ;;
@@ -39,6 +42,7 @@ type expression = Variable of string
                 | Global of string * expression
                 | Boolean of bool
                 | Natural of int
+                | Unit
                 | Cond of expression * expression * expression
                 ;;
 
@@ -50,6 +54,7 @@ let rec expression_to_string = function
   | Global (varname, varexpr) -> "let " ^ varname ^ " = " ^ (expression_to_string varexpr) ^ " ;; "
   | Boolean b -> if b then "true" else "false"
   | Natural n -> string_of_int n
+  | Unit -> "unit"
   | Cond (c, t, e) -> "if " ^ (expression_to_string c) ^ " then " ^ (expression_to_string t) ^ " else " ^ (expression_to_string e)
 ;;
 
@@ -58,6 +63,7 @@ let rec expression_is_value = function
   | NativeFunction _ -> true
   | Boolean _ -> true
   | Natural _ -> true
+  | Unit -> true
   | _ -> false
 ;;
 

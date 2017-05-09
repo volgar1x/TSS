@@ -39,6 +39,7 @@ let rec type_of_expression gamma = function
 
 | Natural _ -> (gamma, Natural)
 | Boolean _ -> (gamma, Boolean)
+| Unit -> (gamma, Unit)
 
 | t -> raise (Type_error ("TODO: " ^ (expression_to_string t)))
 ;;
