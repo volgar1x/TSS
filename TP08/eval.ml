@@ -191,6 +191,7 @@ and eval gamma delta t =
       (delta, t)
     else
       let (delta', t') = eval_step gamma delta t in
+      (* print_endline (">> " ^ (string_of_expression t)); *)
       aux delta' t'
   in
 

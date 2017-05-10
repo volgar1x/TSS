@@ -193,7 +193,7 @@ let expression_variable x v t =
                                              cases)
   | Proj (self, f) -> Proj (aux self, f)
   | Each (t1, t2) -> Each (aux t1, aux t2)
-  | Assign (x, t) -> Assign (x, aux t)
+  | Assign (x, t) -> Assign (aux x, aux t)
   | Access (t) -> Access (aux t)
 
   | t -> t
