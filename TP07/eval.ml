@@ -2,12 +2,39 @@ open Expression ;;
 
 exception Eval_error of string ;;
 
-let succ delta = function
+let lambda_succ delta = function
 | Natural n -> (delta, Natural (n + 1))
 | _ -> raise (Eval_error "invalid succ")
 ;;
 
-let rec eval_step delta = function
+let lambda_pred delta = function
+| Natural n -> (delta, Natural (n - 1))
+| _ -> raise (Eval_error "invalid pred")
+;;
+
+let lambda_iszero delta = function
+| Natural n -> (delta, Boolean (n == 0))
+| _ -> raise (Eval_error "invalid iszero")
+;;
+
+
+let rec expression_recfunc name ty t =
+  let (pty, rty) = match ty with
+  | Apply (l, r) -> (l, r)
+  | _ -> raise (Eval_error ("bad recursive function signature: " ^ (string_of_type ty)))
+  in
+
+  let rec aux delta v =
+    let delta' = Assoc.put name self delta in
+    let t' = expression_variable name self t in
+    eval delta' (Application (t', v))
+
+  and self = NativeFunction (name, pty, rty, aux) in
+
+  self
+
+
+and eval_step delta = function
 (* E-AppAbs *)
 | Application (Function (x, _, t), v) when expression_is_value v ->
   (delta, expression_variable x v t)
@@ -32,8 +59,9 @@ let rec eval_step delta = function
 | Global (x, t) ->
   let (_, t') = eval_step delta t in
   (delta, Global (x, t'))
-| Variable "succ" ->
-  (delta, NativeFunction ("succ", Natural, Natural, succ))
+| Variable "succ" -> (delta, NativeFunction ("succ", Natural, Natural, lambda_succ))
+| Variable "pred" -> (delta, NativeFunction ("pred", Natural, Natural, lambda_pred))
+| Variable "iszero" -> (delta, NativeFunction ("pred", Natural, Natural, lambda_iszero))
 | Variable var ->
   begin match Assoc.find var delta with
   | None -> raise (Eval_error ("undefined variable " ^ var ^ ": " ^ (Assoc.keys_to_string delta)))
@@ -109,14 +137,21 @@ let rec eval_step delta = function
   let (_, t') = eval_step delta t in
   (delta, Case (t', cases))
 
+(* E-Fix *)
+| DefineRecFunc (name, ty, t, rest) ->
+  let fn0 = expression_recfunc name ty t in
+  print_endline (expression_to_string fn0);
+  let fn = expression_variable name fn0 fn0 in
+  (delta, expression_variable name fn rest)
+
 | v when expression_is_value v ->
   (delta, v)
 
 | t ->
   raise (Eval_error ("stuck term: " ^ (expression_to_string t)))
-;;
 
-let eval delta t =
+
+and eval delta t =
   let rec aux delta t =
     if expression_is_value t then
       (delta, t)
