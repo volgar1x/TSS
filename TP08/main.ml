@@ -20,13 +20,13 @@ let code_loc buf =
 let rec loop gamma delta buf =
   try
     (* print_endline (Assoc.to_string ~kv:" : " string_of_type gamma); *)
-    (* print_endline (Assoc.to_string ~kv:" = " expression_to_string delta); *)
+    (* print_endline (Assoc.to_string ~kv:" = " string_of_expression delta); *)
     let t = Parser.line Lexer.lexer buf in
-    print_endline ("> " ^ (Str.global_replace (Str.regexp "\n") "\n> " (expression_to_string t)));
+    print_endline ("> " ^ (Str.global_replace (Str.regexp "\n") "\n> " (string_of_expression t)));
     let (gamma', ty) = type_of_expression gamma t in
     print_endline ("Σ " ^ (string_of_type ty));
     let (delta', t') = Eval.eval gamma delta t in
-    print_endline ((expression_to_string t') ^ "\n");
+    print_endline ((string_of_expression t') ^ "\n");
     loop gamma' delta' buf
   with
   | Parsing.Parse_error -> print_endline ("Parse error on " ^ (code_loc buf) ^ "\n  `" ^ (Lexing.lexeme buf) ^ "'\n")

@@ -105,33 +105,33 @@ and delta = (string * expression) list
 and gamma = (string * type_) list
 ;;
 
-let rec expression_to_string = function
+let rec string_of_expression = function
   | Variable var -> var
-  | Function (var, ty, body) -> "λ" ^ var ^  " : " ^ (string_of_type ty) ^ ". " ^ (expression_to_string body)
+  | Function (var, ty, body) -> "λ" ^ var ^  " : " ^ (string_of_type ty) ^ ". " ^ (string_of_expression body)
   | NativeFunction (f, ty, rty, _) -> "λx : " ^ (string_of_type ty) ^ ". [native/" ^ f ^ " : " ^ (string_of_type rty) ^ "]"
-  | DefineRecFunc (x, ty, t, rest) -> "letrec " ^ x ^ " : " ^ (string_of_type ty) ^ " = " ^ (expression_to_string t) ^ " in " ^ (expression_to_string rest)
-  | Application (left, ((Application _) as right)) -> (expression_to_string left) ^ " (" ^ (expression_to_string right) ^ ")"
-  | Application (left, right) -> (expression_to_string left) ^ " " ^ (expression_to_string right)
-  | Global (varname, varexpr) -> "let " ^ varname ^ " = " ^ (expression_to_string varexpr) ^ " ;; "
-  | Local (varname, varexpr, body) -> "let " ^ varname ^ " = " ^ (expression_to_string varexpr) ^ " in\n" ^ (expression_to_string body)
+  | DefineRecFunc (x, ty, t, rest) -> "letrec " ^ x ^ " : " ^ (string_of_type ty) ^ " = " ^ (string_of_expression t) ^ " in " ^ (string_of_expression rest)
+  | Application (left, ((Application _) as right)) -> (string_of_expression left) ^ " (" ^ (string_of_expression right) ^ ")"
+  | Application (left, right) -> (string_of_expression left) ^ " " ^ (string_of_expression right)
+  | Global (varname, varexpr) -> "let " ^ varname ^ " = " ^ (string_of_expression varexpr) ^ " ;; "
+  | Local (varname, varexpr, body) -> "let " ^ varname ^ " = " ^ (string_of_expression varexpr) ^ " in\n" ^ (string_of_expression body)
   | Boolean b -> if b then "true" else "false"
   | Natural n -> string_of_int n
   | Unit -> "unit"
-  | Cond (c, t, e) -> "if " ^ (expression_to_string c) ^ " then " ^ (expression_to_string t) ^ " else " ^ (expression_to_string e)
-  | Each (a, b) -> (expression_to_string a) ^ ";\n" ^ (expression_to_string b)
-  | Record xs -> Assoc.to_string expression_to_string xs
-  | Proj (self, f) -> (expression_to_string self) ^ "." ^ f
-  | Variant (f, t, ty) -> "<" ^ f ^ " = " ^ (expression_to_string t) ^ "> as " ^ (string_of_type ty)
-  | Assign (var, value) -> var ^ " := " ^ (expression_to_string value)
-  | Access (var) -> "!" ^ (expression_to_string var)
-  | Ref (name, ty, slot) -> name ^ "[" ^ (expression_to_string !slot) ^ "] : " ^ (string_of_type (Ref ty))
+  | Cond (c, t, e) -> "if " ^ (string_of_expression c) ^ " then " ^ (string_of_expression t) ^ " else " ^ (string_of_expression e)
+  | Each (a, b) -> (string_of_expression a) ^ ";\n" ^ (string_of_expression b)
+  | Record xs -> Assoc.to_string string_of_expression xs
+  | Proj (self, f) -> (string_of_expression self) ^ "." ^ f
+  | Variant (f, t, ty) -> "<" ^ f ^ " = " ^ (string_of_expression t) ^ "> as " ^ (string_of_type ty)
+  | Assign (var, value) -> var ^ " := " ^ (string_of_expression value)
+  | Access (var) -> "!" ^ (string_of_expression var)
+  | Ref (name, ty, slot) -> name ^ "[" ^ (string_of_expression !slot) ^ "] : " ^ (string_of_type (Ref ty))
 
   | Case (t, cases) ->
-    "case " ^ (expression_to_string t) ^ " of " ^
+    "case " ^ (string_of_expression t) ^ " of " ^
       (String.concat " | "
         (List.map
-          (function VariantCase (f, x, t2) -> "<" ^ f ^ " = " ^ x ^ "> => " ^ (expression_to_string t2)
-                  | VariantFallthrough t2 -> "_ => " ^ (expression_to_string t2))
+          (function VariantCase (f, x, t2) -> "<" ^ f ^ " = " ^ x ^ "> => " ^ (string_of_expression t2)
+                  | VariantFallthrough t2 -> "_ => " ^ (string_of_expression t2))
           cases))
 ;;
 

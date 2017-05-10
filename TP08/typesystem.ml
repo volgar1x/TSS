@@ -4,7 +4,7 @@ exception Type_error of string ;;
 
 let type_expect t a b =
   if type_equal a b then ()
-  else raise (Type_error ("expected " ^ (string_of_type b) ^ " but got " ^ (expression_to_string t) ^ " : " ^ (string_of_type a)))
+  else raise (Type_error ("expected " ^ (string_of_type b) ^ " but got " ^ (string_of_expression t) ^ " : " ^ (string_of_type a)))
 ;;
 
 let rec type_of_expression gamma = function
@@ -32,7 +32,7 @@ let rec type_of_expression gamma = function
   | Apply (ty, rty) ->
     type_expect t2 t2ty ty;
     (gamma, rty)
-  | _ -> raise (Type_error ("cannot apply " ^ (expression_to_string t1) ^ " : " ^ (string_of_type t1ty))))
+  | _ -> raise (Type_error ("cannot apply " ^ (string_of_expression t1) ^ " : " ^ (string_of_type t1ty))))
 
 | Record xs ->
   let xs' = List.map
@@ -122,7 +122,7 @@ let rec type_of_expression gamma = function
   in
   (gamma, varty)
 | Access (t) ->
-  raise (Type_error ("cannot access value of " ^ (expression_to_string t)))
+  raise (Type_error ("cannot access value of " ^ (string_of_expression t)))
 
 | Variable "succ" -> (gamma, Apply (Natural, Natural))
 | Variable "pred" -> (gamma, Apply (Natural, Natural))
@@ -137,7 +137,7 @@ let rec type_of_expression gamma = function
 | Boolean _ -> (gamma, Boolean)
 | Unit -> (gamma, Unit)
 
-| t -> raise (Type_error ("TODO: " ^ (expression_to_string t)))
+| t -> raise (Type_error ("TODO: " ^ (string_of_expression t)))
 ;;
 
 let gamma_of_delta xs =

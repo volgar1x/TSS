@@ -47,7 +47,7 @@ and eval_step gamma delta = function
 | Assign (var, v) when expression_is_value v ->
   begin match Assoc.get var delta with
   | Ref (_, _, r) -> r := v
-  | t -> raise (Eval_error ("cannot assign variable `" ^ var ^ "' which is " ^ (expression_to_string t)))
+  | t -> raise (Eval_error ("cannot assign variable `" ^ var ^ "' which is " ^ (string_of_expression t)))
   end;
   (delta, Unit)
 | Assign (var, t) ->
@@ -69,7 +69,7 @@ and eval_step gamma delta = function
 | Application (NativeFunction (_, _, _, fn), v) when expression_is_value v ->
   fn gamma delta v
 | Application (v1, v2) when expression_is_value v1 && expression_is_value v2 ->
-  raise (Eval_error ("cannot apply " ^ (expression_to_string v1)))
+  raise (Eval_error ("cannot apply " ^ (string_of_expression v1)))
 
 (* E-App2 *)
 | Application (t, v) when expression_is_value v ->
@@ -136,7 +136,7 @@ and eval_step gamma delta = function
 | Proj (self, f) when expression_is_value self ->
   begin match self with
   | Record xs -> (delta, Assoc.get f xs)
-  | t -> raise (Eval_error ("cannot access " ^ f ^ " of " ^ (expression_to_string t)))
+  | t -> raise (Eval_error ("cannot access " ^ f ^ " of " ^ (string_of_expression t)))
   end
 
 (* E-Proj *)
@@ -171,7 +171,7 @@ and eval_step gamma delta = function
 (* E-Fix *)
 | DefineRecFunc (name, ty, t, rest) ->
   let fn0 = expression_recfunc name ty t in
-  print_endline (expression_to_string fn0);
+  print_endline (string_of_expression fn0);
   let fn = expression_variable name fn0 fn0 in
   (delta, expression_variable name fn rest)
 
@@ -179,7 +179,7 @@ and eval_step gamma delta = function
   (delta, v)
 
 | t ->
-  raise (Eval_error ("stuck term: " ^ (expression_to_string t)))
+  raise (Eval_error ("stuck term: " ^ (string_of_expression t)))
 
 
 and eval gamma delta t =
