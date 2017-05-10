@@ -18,7 +18,7 @@ let x = (lambda y : Nat. 0) in x ;;
 
 let x = 0 in (unit ; 0) ;;
 
-let fctAEffetDeBord = lambda x : Nat. 
+let fctAEffetDeBord = lambda x : Nat.
   # instructionAEffetDeBord
   unit
 in
@@ -41,7 +41,7 @@ in
 let combine = lambda v1 : {val : Nat, flag : Bool}.
   lambda v2 : {val : Nat, flag : Bool}.
     {flag = v2.flag, val = v1.val}
-in 
+in
   combine enr1 enr2
 ;;
 
@@ -54,7 +54,7 @@ let v2 = <bidon2 = 0> as <bidon1 : Bool | bidon2 : Nat> ;;
 let fct_bidon = lambda v : <bidon1 : Bool | bidon2 : Nat>.
   case v of
     | <bidon1 = x1> => if x1 then 0 else succ 0
-    | <bidon2 = x2> => succ x2 
+    | <bidon2 = x2> => succ x2
 ;;
 
 fct_bidon v1 ;;

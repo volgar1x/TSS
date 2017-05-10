@@ -79,6 +79,13 @@ let rec type_of_expression gamma = function
   | hd :: _ -> (gamma, hd)
   end
 
+| DefineRecFunc (x, ty, t, body) ->
+  let gamma' = Assoc.put x ty gamma in
+  let (_, tty) = type_of_expression gamma' t in
+  type_expect tty ty;
+  let (_, bodyty) = type_of_expression gamma' body in
+  (gamma, bodyty)
+
 | Global (x, t) ->
   let (_, tty) = type_of_expression gamma t in
   (Assoc.put x tty gamma, tty)
@@ -94,7 +101,11 @@ let rec type_of_expression gamma = function
   type_of_expression gamma' b
 
 | Variable "succ" -> (gamma, Apply (Natural, Natural))
-| Variable x -> (gamma, Assoc.get x gamma)
+| Variable x ->
+  begin match Assoc.find x gamma with
+  | None -> raise (Type_error ("undefined variable " ^ x))
+  | Some xty -> (gamma, xty)
+  end
 
 | Natural _ -> (gamma, Natural)
 | Boolean _ -> (gamma, Boolean)
