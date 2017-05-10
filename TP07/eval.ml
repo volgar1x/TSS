@@ -85,6 +85,30 @@ let rec eval_step delta = function
   let (_, self') = eval_step delta self in
   (delta, Proj (self', f))
 
+(* E-CaseInl, E-CaseInr *)
+| Case (v, cases) when expression_is_value v ->
+  let result = MoreList.branch_first (function
+    | VariantCase (f, x, t) ->
+      begin match v with
+      | Variant (f2, v, _) when String.equal f f2 ->
+        Some (expression_variable x v t)
+      | _ -> None
+      end
+    | VariantFallthrough t ->
+      let (_, t') = eval_step delta t in
+      Some t'
+  ) cases in
+
+  begin match result with
+  | Some result' -> (delta, result')
+  | None -> raise (Eval_error ("case incomplete"))
+  end
+
+(* E-Case *)
+| Case (t, cases) ->
+  let (_, t') = eval_step delta t in
+  (delta, Case (t', cases))
+
 | v when expression_is_value v ->
   (delta, v)
 
