@@ -105,11 +105,11 @@ let rec type_of_expression gamma = function
   type_of_expression gamma' b
 
 | Assign (var, t) ->
+  let (_, varty) = type_of_expression gamma var in
   let (_, ty) = type_of_expression gamma t in
-  let varty = match Assoc.find var gamma with
-  | Some (Ref x) -> x
-  | Some x -> raise (Type_error ("variable `" ^ var ^ "' is not a reference but a " ^ (string_of_type x)))
-  | None -> raise (Type_error ("undefined reference `" ^ var ^ "'"))
+  let varty = match varty with
+  | Ref x -> x
+  | x -> raise (Type_error ("variable `" ^ (string_of_expression var) ^ "' is not a reference but a " ^ (string_of_type x)))
   in
   type_expect t ty varty;
   (gamma, Unit)

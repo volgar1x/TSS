@@ -44,15 +44,18 @@ and eval_step gamma delta = function
   (delta, Application (Variable "ref", t'))
 
 (* reference assignment *)
-| Assign (var, v) when expression_is_value v ->
-  begin match Assoc.get var delta with
+| Assign (var, v) when expression_is_value var && expression_is_value v ->
+  begin match var with
   | Ref (_, _, r) -> r := v
-  | t -> raise (Eval_error ("cannot assign variable `" ^ var ^ "' which is " ^ (string_of_expression t)))
+  | t -> raise (Eval_error ("cannot assign variable `" ^ (string_of_expression var) ^ "' which is " ^ (string_of_expression t)))
   end;
   (delta, Unit)
-| Assign (var, t) ->
+| Assign (var, t) when expression_is_value var ->
   let (_, t') = eval_step gamma delta t in
   (delta, Assign (var, t'))
+| Assign (t1, t2) ->
+  let (_, t1') = eval_step gamma delta t1 in
+  (delta, Assign (t1', t2))
 
 (* reference access *)
 | Access (Ref (_, _, r)) ->

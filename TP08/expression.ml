@@ -94,7 +94,7 @@ type expression = Variable of string
                 | Proj of expression * string
                 | Variant of string * expression * type_
                 | Case of expression * (variant list)
-                | Assign of string * expression
+                | Assign of expression * expression
                 | Access of expression
                 | Ref of string * type_ * (expression ref)
 
@@ -122,7 +122,7 @@ let rec string_of_expression = function
   | Record xs -> Assoc.to_string string_of_expression xs
   | Proj (self, f) -> (string_of_expression self) ^ "." ^ f
   | Variant (f, t, ty) -> "<" ^ f ^ " = " ^ (string_of_expression t) ^ "> as " ^ (string_of_type ty)
-  | Assign (var, value) -> var ^ " := " ^ (string_of_expression value)
+  | Assign (var, value) -> (string_of_expression var) ^ " := " ^ (string_of_expression value)
   | Access (var) -> "!" ^ (string_of_expression var)
   | Ref (name, ty, slot) -> name ^ "[" ^ (string_of_expression !slot) ^ "] : " ^ (string_of_type (Ref ty))
 
@@ -151,7 +151,7 @@ let rec verbose_string_of_expression = function
   | Record xs -> "Record(" ^ (Assoc.to_string verbose_string_of_expression xs) ^ ")"
   | Proj (self, f) -> "Proj(" ^ (verbose_string_of_expression self) ^ ", " ^ f ^ ")"
   | Variant (f, t, ty) -> "Variant(" ^ f ^ ", " ^ (verbose_string_of_expression t) ^ ", " ^ (string_of_type ty) ^ ")"
-  | Assign (var, value) -> "Assign(" ^ var ^ ", " ^ (verbose_string_of_expression value) ^ ")"
+  | Assign (var, value) -> "Assign(" ^ (verbose_string_of_expression value) ^ ", " ^ (verbose_string_of_expression value) ^ ")"
   | Access (var) -> "Access(" ^ (verbose_string_of_expression var) ^ ")"
   | Ref (name, ty, slot) -> "Ref(" ^ name ^ ", " ^ (string_of_type ty) ^ ", !" ^ (verbose_string_of_expression !slot) ^ ")"
   | Case (t, cases) -> "Case(" ^ (verbose_string_of_expression t) ^ ", [" ^

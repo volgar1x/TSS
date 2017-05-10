@@ -53,7 +53,7 @@ line :
 ;
 
 expr :
-     | Lident Lassign expr                                                 {Assign ($1, $3)}
+     | Lident Lassign expr                                                 {Assign (Variable $1, $3)}
      | Lletrec Lident Lcolon type Leq expr Lin expr                        {DefineRecFunc ($2, $4, $6, $8)}
      | Llet Lident Leq expr Lin expr                                       {Local ($2, $4, $6)}
      | Llet Lident Leq expr                                                {Global ($2, $4)}
