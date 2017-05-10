@@ -5,6 +5,7 @@ type type_ = Boolean
            | Name of string
            | Record of ((string * type_) list)
            | Variant of ((string * type_) list)
+           | Ref of type_
            ;;
 
 let type_of_string = function
@@ -31,6 +32,12 @@ and type_variant_equal left right =
 
 and type_equal a b =
   match a with
+  | Ref a' ->
+    begin match b with
+    | Ref b' -> type_equal a' b'
+    | _ -> false
+    end
+
   | Record xs1 ->
     begin match b with
     | Record xs2 -> type_record_equal xs1 xs2
@@ -66,6 +73,7 @@ let rec string_of_type = function
   | Variant xs -> Assoc.to_string ~start:"<" ~stop:">" ~kv:" : " ~sep:" | " string_of_type xs
   | Apply (a, b) -> "(" ^ (string_of_type a) ^ " -> " ^ (string_of_type b) ^ ")"
   | Name n -> "^" ^ n
+  | Ref ty -> "Ref " ^ (string_of_type ty)
 ;;
 
 type expression = Variable of string
@@ -84,6 +92,8 @@ type expression = Variable of string
                 | Proj of expression * string
                 | Variant of string * expression * type_
                 | Case of expression * (variant list)
+                | Assign of string * expression
+                | Access of string
 
 and variant = VariantCase of string * string * expression
             | VariantFallthrough of expression
@@ -105,6 +115,8 @@ let rec expression_to_string = function
   | Record xs -> Assoc.to_string expression_to_string xs
   | Proj (self, f) -> (expression_to_string self) ^ "." ^ f
   | Variant (f, t, ty) -> "<" ^ f ^ " = " ^ (expression_to_string t) ^ "> as " ^ (string_of_type ty)
+  | Assign (var, value) -> var ^ " := " ^ (expression_to_string value)
+  | Access (var) -> "!" ^ var
 
   | Case (t, cases) ->
     "case " ^ (expression_to_string t) ^ " of " ^

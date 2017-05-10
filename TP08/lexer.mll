@@ -36,10 +36,12 @@ rule lexer = parse
   | ","                                                 {Lcomma}
   | "."                                                 {Ldot}
   | ":"                                                 {Lcolon}
+  | "!"                                                 {Lbang}
   | "->"                                                {Larrow}
   | "=>"                                                {Lfatarrow}
   | "letrec"                                            {Lletrec}
   | "="                                                 {Leq}
+  | ":="                                                {Lassign}
   | "true"                                              {Ltrue}
   | "false"                                             {Lfalse}
   | "if"                                                {Lif}
@@ -53,6 +55,7 @@ rule lexer = parse
   | "as"                                                {Las}
   | "case"                                              {Lcase}
   | "of"                                                {Lof}
+  | "Ref"                                               {Ltyperef}
   | "_"                                                 {Lunderscore}
 
   | ['0'-'9']+                                              {Linteger (Lexing.lexeme lexbuf)}

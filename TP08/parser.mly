@@ -14,10 +14,12 @@
 %token Lcomma
 %token Ldot
 %token Lcolon
+%token Lbang
 %token Larrow
 %token Lfatarrow
 %token Lletrec
 %token Leq
+%token Lassign
 %token <string> Lident
 %token <string> Linteger
 %token Ltrue
@@ -33,6 +35,7 @@
 %token Las
 %token Lcase
 %token Lof
+%token Ltyperef
 %token Lunderscore
 
 %start line
@@ -50,6 +53,7 @@ line :
 ;
 
 expr :
+     | Lident Lassign expr                                                 {Assign ($1, $3)}
      | Lletrec Lident Lcolon type Leq expr Lin expr                        {DefineRecFunc ($2, $4, $6, $8)}
      | Llet Lident Leq expr Lin expr                                       {Local ($2, $4, $6)}
      | Llet Lident Leq expr                                                {Global ($2, $4)}
@@ -67,6 +71,7 @@ expr1 :
 ;
 
 expr2 :
+      | Lbang Lident               { Access ($2) }
       | Lident Ldot Lident         { Proj (Variable $1, $3) }
       | Lident                     { Variable ($1) }
       | Ltrue                      { Boolean (true) }
@@ -87,6 +92,7 @@ type1 :
       | Loparen type Lcparen            { $2 }
       | Lobrack typerecordlist Lcbrack  { Record $2 }
       | Loangle typevariantlist Lcangle { Variant ($2) }
+      | Ltyperef type                   { Ref ($2) }
 ;
 
 recordlist :
