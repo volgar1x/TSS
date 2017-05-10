@@ -35,14 +35,16 @@ let rec eval_step delta = function
 | Variable "succ" ->
   (delta, NativeFunction ("succ", Natural, Natural, succ))
 | Variable var ->
-  let v = Assoc.get var delta in
-  (delta, v)
+  begin match Assoc.find var delta with
+  | None -> raise (Eval_error ("undefined variable " ^ var ^ ": " ^ (Assoc.keys_to_string delta)))
+  | Some v -> (delta, v)
+  end
 
-(* E-LetIn *)
+(* E-LetVal *)
 | Local (x, v, t) when expression_is_value v ->
-  let delta' = Assoc.put x v delta in
-  let (_, t') = eval_step delta' t in
-  (delta, t')
+  (delta, expression_variable x v t)
+
+(* E-Let *)
 | Local (x, t1, t2) ->
   let (_, t1') = eval_step delta t1 in
   (delta, Local (x, t1', t2))
@@ -71,12 +73,17 @@ let rec eval_step delta = function
   ) xs) in
   (delta, f')
 
-(* E-Proj *)
-| Proj (self, f) ->
-  begin match Assoc.get self delta with
+(* E-ProjRcd *)
+| Proj (self, f) when expression_is_value self ->
+  begin match self with
   | Record xs -> (delta, Assoc.get f xs)
   | t -> raise (Eval_error ("cannot access " ^ f ^ " of " ^ (expression_to_string t)))
   end
+
+(* E-Proj *)
+| Proj (self, f) ->
+  let (_, self') = eval_step delta self in
+  (delta, Proj (self', f))
 
 | v when expression_is_value v ->
   (delta, v)

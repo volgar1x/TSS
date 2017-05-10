@@ -81,7 +81,7 @@ type expression = Variable of string
                 | Cond of expression * expression * expression
                 | Each of expression * expression
                 | Record of ((string * expression) list)
-                | Proj of string * string
+                | Proj of expression * string
                 | Variant of string * expression * type_
                 | Case of expression * (variant list)
 
@@ -96,14 +96,14 @@ let rec expression_to_string = function
   | DefineRecFunc (x, ty, t, rest) -> "letrec " ^ x ^ " : " ^ (string_of_type ty) ^ " = " ^ (expression_to_string t) ^ " in " ^ (expression_to_string rest)
   | Application (left, right) -> "(" ^ (expression_to_string left) ^ " " ^ (expression_to_string right) ^ ")"
   | Global (varname, varexpr) -> "let " ^ varname ^ " = " ^ (expression_to_string varexpr) ^ " ;; "
-  | Local (varname, varexpr, body) -> "let " ^ varname ^ " = " ^ (expression_to_string varexpr) ^ " in " ^ (expression_to_string body)
+  | Local (varname, varexpr, body) -> "let " ^ varname ^ " = " ^ (expression_to_string varexpr) ^ " in\n" ^ (expression_to_string body)
   | Boolean b -> if b then "true" else "false"
   | Natural n -> string_of_int n
   | Unit -> "unit"
   | Cond (c, t, e) -> "if " ^ (expression_to_string c) ^ " then " ^ (expression_to_string t) ^ " else " ^ (expression_to_string e)
   | Each (a, b) -> (expression_to_string a) ^ " ; " ^ (expression_to_string b)
   | Record xs -> Assoc.to_string expression_to_string xs
-  | Proj (self, f) -> self ^ "." ^ f
+  | Proj (self, f) -> (expression_to_string self) ^ "." ^ f
   | Variant (f, t, ty) -> "<" ^ f ^ " = " ^ (expression_to_string t) ^ "> as " ^ (string_of_type ty)
 
   | Case (t, cases) ->
@@ -131,10 +131,12 @@ let expression_variable x v t =
   | Variable x' when String.equal x x' -> v
   | (Function (x', ty, _)) as t1 when String.equal x x' -> t1
   | (Global (x', _)) as t1 when String.equal x x' -> t1
+  | (Local (x', _, _)) as t1 when String.equal x x' -> t1
 
   | Function (x', ty, t) -> Function (x', ty, aux t)
   | Application (t1, t2) -> Application (aux t1, aux t2)
   | Global (x', t) -> Global (x', aux t)
+  | Local (x', t1, t2) -> Local (x', aux t1, aux t2)
   | Cond (c, t, e) -> Cond (aux c, aux t, aux e)
   | Record xs -> Record (List.map (fun (k, v) -> (k, aux v)) xs)
   | Variant (f, t, ty) -> Variant (f, aux t, ty)
@@ -142,6 +144,7 @@ let expression_variable x v t =
                                               | VariantCase (f, x, t2) -> VariantCase (f, x, aux t2)
                                               | VariantFallthrough t2 -> VariantFallthrough (aux t2))
                                              cases)
+  | Proj (self, f) -> Proj (aux self, f)
 
   | t -> t
   in

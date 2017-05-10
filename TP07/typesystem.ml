@@ -40,7 +40,7 @@ let rec type_of_expression gamma = function
   (gamma, Record xs')
 
 | Proj (self, f) ->
-  let ty = Assoc.get self gamma in
+  let (_, ty) = type_of_expression gamma self in
   begin match ty with
   | Record xs -> (gamma, Assoc.get f xs)
   | _ -> raise (Type_error ("cannot access field `" ^ f ^ "' on " ^ (string_of_type ty)))
