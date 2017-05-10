@@ -71,7 +71,7 @@ expr1 :
 ;
 
 expr2 :
-      | Lbang Lident               { Access ($2) }
+      | Lbang Lident               { Access (Variable $2) }
       | Lident Ldot Lident         { Proj (Variable $1, $3) }
       | Lident                     { Variable ($1) }
       | Ltrue                      { Boolean (true) }

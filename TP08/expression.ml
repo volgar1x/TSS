@@ -71,14 +71,16 @@ let rec string_of_type = function
   | Unit -> "Unit"
   | Record xs -> Assoc.to_string ~kv:" : " string_of_type xs
   | Variant xs -> Assoc.to_string ~start:"<" ~stop:">" ~kv:" : " ~sep:" | " string_of_type xs
-  | Apply (a, b) -> "(" ^ (string_of_type a) ^ " -> " ^ (string_of_type b) ^ ")"
+  | Apply ((Apply _) as a, b) -> "(" ^ (string_of_type a) ^ ") -> " ^ (string_of_type b)
+  | Apply (a, b) -> (string_of_type a) ^ " -> " ^ (string_of_type b)
   | Name n -> "^" ^ n
+  | Ref ((Apply _) as ty) -> "Ref (" ^ (string_of_type ty) ^ ")"
   | Ref ty -> "Ref " ^ (string_of_type ty)
 ;;
 
 type expression = Variable of string
                 | Function of string * type_ * expression
-                | NativeFunction of string * type_ * type_ * (((string * expression) list) -> expression -> (((string * expression) list) * expression))
+                | NativeFunction of string * type_ * type_ * (gamma -> delta -> expression -> (delta * expression))
                 | DefineRecFunc of string * type_ * expression * expression
                 | Application of expression * expression
                 | Global of string * expression
@@ -93,11 +95,14 @@ type expression = Variable of string
                 | Variant of string * expression * type_
                 | Case of expression * (variant list)
                 | Assign of string * expression
-                | Access of string
+                | Access of expression
                 | Ref of string * type_ * (expression ref)
 
 and variant = VariantCase of string * string * expression
             | VariantFallthrough of expression
+
+and delta = (string * expression) list
+and gamma = (string * type_) list
 ;;
 
 let rec expression_to_string = function
@@ -105,19 +110,20 @@ let rec expression_to_string = function
   | Function (var, ty, body) -> "λ" ^ var ^  " : " ^ (string_of_type ty) ^ ". " ^ (expression_to_string body)
   | NativeFunction (f, ty, rty, _) -> "λx : " ^ (string_of_type ty) ^ ". [native/" ^ f ^ " : " ^ (string_of_type rty) ^ "]"
   | DefineRecFunc (x, ty, t, rest) -> "letrec " ^ x ^ " : " ^ (string_of_type ty) ^ " = " ^ (expression_to_string t) ^ " in " ^ (expression_to_string rest)
-  | Application (left, right) -> "(" ^ (expression_to_string left) ^ " " ^ (expression_to_string right) ^ ")"
+  | Application (left, ((Application _) as right)) -> (expression_to_string left) ^ " (" ^ (expression_to_string right) ^ ")"
+  | Application (left, right) -> (expression_to_string left) ^ " " ^ (expression_to_string right)
   | Global (varname, varexpr) -> "let " ^ varname ^ " = " ^ (expression_to_string varexpr) ^ " ;; "
   | Local (varname, varexpr, body) -> "let " ^ varname ^ " = " ^ (expression_to_string varexpr) ^ " in\n" ^ (expression_to_string body)
   | Boolean b -> if b then "true" else "false"
   | Natural n -> string_of_int n
   | Unit -> "unit"
   | Cond (c, t, e) -> "if " ^ (expression_to_string c) ^ " then " ^ (expression_to_string t) ^ " else " ^ (expression_to_string e)
-  | Each (a, b) -> (expression_to_string a) ^ " ; " ^ (expression_to_string b)
+  | Each (a, b) -> (expression_to_string a) ^ ";\n" ^ (expression_to_string b)
   | Record xs -> Assoc.to_string expression_to_string xs
   | Proj (self, f) -> (expression_to_string self) ^ "." ^ f
   | Variant (f, t, ty) -> "<" ^ f ^ " = " ^ (expression_to_string t) ^ "> as " ^ (string_of_type ty)
   | Assign (var, value) -> var ^ " := " ^ (expression_to_string value)
-  | Access (var) -> "!" ^ var
+  | Access (var) -> "!" ^ (expression_to_string var)
   | Ref (name, ty, slot) -> name ^ "[" ^ (expression_to_string !slot) ^ "] : " ^ (string_of_type (Ref ty))
 
   | Case (t, cases) ->
@@ -162,6 +168,7 @@ let expression_variable x v t =
   | Proj (self, f) -> Proj (aux self, f)
   | Each (t1, t2) -> Each (aux t1, aux t2)
   | Assign (x, t) -> Assign (x, aux t)
+  | Access (t) -> Access (aux t)
 
   | t -> t
   in

@@ -40,9 +40,8 @@ let update = lambda t : Ref (Nat -> Nat). lambda m : Nat. lambda v : Nat.
 
 let t = new_array unit
 in (
-  update t (succ (succ 0)) succ 0 ;
+  update t (succ (succ 0)) (succ 0) ;
   update t (succ 0) (succ (succ 0)) ;
-  update t 0 succ 0 ;
+  update t 0 (succ 0) ;
   lookup t (succ 0)
 ) ;;
-

@@ -2,9 +2,9 @@ open Expression ;;
 
 exception Type_error of string ;;
 
-let type_expect a b =
+let type_expect t a b =
   if type_equal a b then ()
-  else raise (Type_error ("expected " ^ (string_of_type b) ^ " but got: " ^ (string_of_type a)))
+  else raise (Type_error ("expected " ^ (string_of_type b) ^ " but got " ^ (expression_to_string t) ^ " : " ^ (string_of_type a)))
 ;;
 
 let rec type_of_expression gamma = function
@@ -17,8 +17,8 @@ let rec type_of_expression gamma = function
   let (_, cty) = type_of_expression gamma c in
   let (_, tty) = type_of_expression gamma t in
   let (_, ety) = type_of_expression gamma e in
-  type_expect cty Boolean;
-  type_expect tty ety;
+  type_expect c cty Boolean;
+  type_expect t tty ety;
   (gamma, tty)
 
 | Application (Variable "ref", t) ->
@@ -30,9 +30,9 @@ let rec type_of_expression gamma = function
   let (_, t2ty) = type_of_expression gamma t2 in
   (match t1ty with
   | Apply (ty, rty) ->
-    type_expect t2ty ty;
+    type_expect t2 t2ty ty;
     (gamma, rty)
-  | _ -> raise (Type_error ("cannot apply " ^ (expression_to_string t1))))
+  | _ -> raise (Type_error ("cannot apply " ^ (expression_to_string t1) ^ " : " ^ (string_of_type t1ty))))
 
 | Record xs ->
   let xs' = List.map
@@ -86,7 +86,7 @@ let rec type_of_expression gamma = function
 | DefineRecFunc (x, ty, t, body) ->
   let gamma' = Assoc.put x ty gamma in
   let (_, tty) = type_of_expression gamma' t in
-  type_expect tty ty;
+  type_expect t tty ty;
   let (_, bodyty) = type_of_expression gamma' body in
   (gamma, bodyty)
 
@@ -111,22 +111,25 @@ let rec type_of_expression gamma = function
   | Some x -> raise (Type_error ("variable `" ^ var ^ "' is not a reference but a " ^ (string_of_type x)))
   | None -> raise (Type_error ("undefined reference `" ^ var ^ "'"))
   in
-  type_expect ty varty;
+  type_expect t ty varty;
   (gamma, Unit)
 
-| Access (var) ->
+| Access (Variable var) ->
   let varty = match Assoc.find var gamma with
+  | Some (Ref x) -> x
+  | Some x -> raise (Type_error ("variable `" ^ var ^ "' is not a reference but a " ^ (string_of_type x)))
   | None -> raise (Type_error ("undefined reference `" ^ var ^ "'"))
-  | Some x -> x
   in
   (gamma, varty)
+| Access (t) ->
+  raise (Type_error ("cannot access value of " ^ (expression_to_string t)))
 
 | Variable "succ" -> (gamma, Apply (Natural, Natural))
 | Variable "pred" -> (gamma, Apply (Natural, Natural))
 | Variable "iszero" -> (gamma, Apply (Natural, Boolean))
 | Variable x ->
   begin match Assoc.find x gamma with
-  | None -> raise (Type_error ("undefined variable `" ^ x ^ "'"))
+  | None -> raise (Type_error ("undefined variable `" ^ x ^ "': " ^ (Assoc.keys_to_string gamma)))
   | Some xty -> (gamma, xty)
   end
 

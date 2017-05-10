@@ -2,23 +2,17 @@ open Expression ;;
 
 exception Eval_error of string ;;
 
-let type_of_expression delta t =
-  let gamma = Typesystem.gamma_of_delta delta in
-  let (_, ty) = Typesystem.type_of_expression gamma t in
-  ty
-;;
-
-let lambda_succ delta = function
+let lambda_succ gamma delta = function
 | Natural n -> (delta, Natural (n + 1))
 | _ -> raise (Eval_error "invalid succ")
 ;;
 
-let lambda_pred delta = function
+let lambda_pred gamma delta = function
 | Natural n -> (delta, Natural (n - 1))
 | _ -> raise (Eval_error "invalid pred")
 ;;
 
-let lambda_iszero delta = function
+let lambda_iszero gamma delta = function
 | Natural n -> (delta, Boolean (n == 0))
 | _ -> raise (Eval_error "invalid iszero")
 ;;
@@ -30,22 +24,23 @@ let rec expression_recfunc name ty t =
   | _ -> raise (Eval_error ("bad recursive function signature: " ^ (string_of_type ty)))
   in
 
-  let rec aux delta v =
+  let rec aux gamma delta v =
     let delta' = Assoc.put name self delta in
     let t' = expression_variable name self t in
-    eval delta' (Application (t', v))
+    eval gamma delta' (Application (t', v))
 
   and self = NativeFunction (name, pty, rty, aux) in
 
   self
 
 
-and eval_step delta = function
+and eval_step gamma delta = function
 (* references *)
 | Application (Variable "ref", v) when expression_is_value v ->
-  (delta, Ref ("<anon>", type_of_expression delta v, ref v))
+  let (_, vty) = Typesystem.type_of_expression gamma v in
+  (delta, Ref ("<anon>", vty, ref v))
 | Application (Variable "ref", t) ->
-  let (_, t') = eval_step delta t in
+  let (_, t') = eval_step gamma delta t in
   (delta, Application (Variable "ref", t'))
 
 (* reference assignment *)
@@ -56,33 +51,34 @@ and eval_step delta = function
   end;
   (delta, Unit)
 | Assign (var, t) ->
-  let (_, t') = eval_step delta t in
+  let (_, t') = eval_step gamma delta t in
   (delta, Assign (var, t'))
 
 (* reference access *)
-| Access (var) ->
-  let res = match Assoc.get var delta with
-  | Ref (_, _, r) -> !r
-  | t -> raise (Eval_error ("cannot access variable `" ^ var ^ "' which is " ^ (expression_to_string t)))
-  in
-  (delta, res)
+| Access (Ref (_, _, r)) ->
+  (delta, !r)
+| Access (v) when expression_is_value v ->
+  raise (Eval_error "")
+| Access (t) ->
+  let (_, t') = eval_step gamma delta t in
+  (delta, Access (t'))
 
 (* E-AppAbs *)
 | Application (Function (x, _, t), v) when expression_is_value v ->
   (delta, expression_variable x v t)
 | Application (NativeFunction (_, _, _, fn), v) when expression_is_value v ->
-  fn delta v
+  fn gamma delta v
 | Application (v1, v2) when expression_is_value v1 && expression_is_value v2 ->
   raise (Eval_error ("cannot apply " ^ (expression_to_string v1)))
 
 (* E-App2 *)
 | Application (t, v) when expression_is_value v ->
-  let (_, t') = eval_step delta t in
+  let (_, t') = eval_step gamma delta t in
   (delta, Application (t', v))
 
 (* E-App1 *)
 | Application (t1, t2) ->
-  let (_, t2') = eval_step delta t2 in
+  let (_, t2') = eval_step gamma delta t2 in
   (delta, Application (t1, t2'))
 
 (* E-Alias *)
@@ -92,7 +88,7 @@ and eval_step delta = function
 | Global (x, v) when expression_is_value v ->
   (Assoc.put x v delta, v)
 | Global (x, t) ->
-  let (_, t') = eval_step delta t in
+  let (_, t') = eval_step gamma delta t in
   (delta, Global (x, t'))
 | Variable "succ" -> (delta, NativeFunction ("succ", Natural, Natural, lambda_succ))
 | Variable "pred" -> (delta, NativeFunction ("pred", Natural, Natural, lambda_pred))
@@ -109,29 +105,29 @@ and eval_step delta = function
 
 (* E-Let *)
 | Local (x, t1, t2) ->
-  let (_, t1') = eval_step delta t1 in
+  let (_, t1') = eval_step gamma delta t1 in
   (delta, Local (x, t1', t2))
 
 (* E-If *)
 | Cond (Boolean true, t, _) ->
-  eval_step delta t
+  eval_step gamma delta t
 | Cond (Boolean false, _, t) ->
-  eval_step delta t
+  eval_step gamma delta t
 | Cond (c, t, e) when not (expression_is_value c) ->
-  let (_, c') = eval_step delta c in
+  let (_, c') = eval_step gamma delta c in
   (delta, Cond (c', t, e))
 
 (* E-Seq *)
 | Each (a, b) when expression_is_value a ->
   (delta, b)
 | Each (a, b) ->
-  let (_, a') = eval_step delta a in
+  let (_, a') = eval_step gamma delta a in
   (delta, Each (a', b))
 
 (* E-Record *)
 | (Record xs) as f when not (expression_is_value f) ->
   let f' = Record (List.map (fun (f, t) ->
-    let (_, t') = eval_step delta t in
+    let (_, t') = eval_step gamma delta t in
     (f, t')
   ) xs) in
   (delta, f')
@@ -145,7 +141,7 @@ and eval_step delta = function
 
 (* E-Proj *)
 | Proj (self, f) ->
-  let (_, self') = eval_step delta self in
+  let (_, self') = eval_step gamma delta self in
   (delta, Proj (self', f))
 
 (* E-CaseInl, E-CaseInr *)
@@ -158,7 +154,7 @@ and eval_step delta = function
       | _ -> None
       end
     | VariantFallthrough t ->
-      let (_, t') = eval_step delta t in
+      let (_, t') = eval_step gamma delta t in
       Some t'
   ) cases in
 
@@ -169,7 +165,7 @@ and eval_step delta = function
 
 (* E-Case *)
 | Case (t, cases) ->
-  let (_, t') = eval_step delta t in
+  let (_, t') = eval_step gamma delta t in
   (delta, Case (t', cases))
 
 (* E-Fix *)
@@ -186,12 +182,12 @@ and eval_step delta = function
   raise (Eval_error ("stuck term: " ^ (expression_to_string t)))
 
 
-and eval delta t =
+and eval gamma delta t =
   let rec aux delta t =
     if expression_is_value t then
       (delta, t)
     else
-      let (delta', t') = eval_step delta t in
+      let (delta', t') = eval_step gamma delta t in
       aux delta' t'
   in
 
