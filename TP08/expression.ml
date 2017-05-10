@@ -135,6 +135,32 @@ let rec string_of_expression = function
           cases))
 ;;
 
+let rec verbose_string_of_expression = function
+  | Variable var -> "Variable(" ^ var ^ ")"
+  | Function (var, ty, body) -> "Function(" ^ var ^ ", " ^ (string_of_type ty) ^ ", " ^ (verbose_string_of_expression body) ^ ")"
+  | NativeFunction (f, ty, rty, _) -> "NativeFunction(" ^ f ^ ", " ^ (string_of_type ty) ^ ", " ^ (string_of_type rty) ^ ", _)"
+  | DefineRecFunc (x, ty, t, rest) -> "DefineRecFunc(" ^ x ^ ", " ^ (string_of_type ty) ^ ", " ^ (verbose_string_of_expression t) ^ ", " ^ (verbose_string_of_expression rest) ^ ")"
+  | Application (left, right) -> "Application(" ^ (verbose_string_of_expression left) ^ ", " ^ (verbose_string_of_expression right) ^ ")"
+  | Global (varname, varexpr) -> "Global(" ^ varname ^ ", " ^ (verbose_string_of_expression varexpr) ^ ")"
+  | Local (varname, varexpr, body) -> "Local(" ^ varname ^ ", " ^ (verbose_string_of_expression varexpr) ^ ", " ^ (verbose_string_of_expression body) ^ ")"
+  | Boolean b -> "Boolean(" ^ (if b then "true" else "false") ^ ")"
+  | Natural n -> "Natural(" ^ (string_of_int n) ^ ")"
+  | Unit -> "Unit"
+  | Cond (c, t, e) -> "Cond(" ^ (verbose_string_of_expression c) ^ ", " ^ (verbose_string_of_expression t) ^ ", " ^ (verbose_string_of_expression e) ^ ")"
+  | Each (a, b) -> "Each(" ^ (verbose_string_of_expression a) ^ ", " ^ (verbose_string_of_expression b) ^ ")"
+  | Record xs -> "Record(" ^ (Assoc.to_string verbose_string_of_expression xs) ^ ")"
+  | Proj (self, f) -> "Proj(" ^ (verbose_string_of_expression self) ^ ", " ^ f ^ ")"
+  | Variant (f, t, ty) -> "Variant(" ^ f ^ ", " ^ (verbose_string_of_expression t) ^ ", " ^ (string_of_type ty) ^ ")"
+  | Assign (var, value) -> "Assign(" ^ var ^ ", " ^ (verbose_string_of_expression value) ^ ")"
+  | Access (var) -> "Access(" ^ (verbose_string_of_expression var) ^ ")"
+  | Ref (name, ty, slot) -> "Ref(" ^ name ^ ", " ^ (string_of_type ty) ^ ", !" ^ (verbose_string_of_expression !slot) ^ ")"
+  | Case (t, cases) -> "Case(" ^ (verbose_string_of_expression t) ^ ", [" ^
+                      (String.concat ", " (List.map (function
+                        | VariantCase (f, x, t2) -> "VariantCase(" ^ f ^ ", " ^ x ^ ", " ^ (verbose_string_of_expression t2) ^ ")"
+                        | VariantFallthrough (t2) -> "VariantFallthrough(" ^ (verbose_string_of_expression t2) ^ ")"
+                       ) cases)) ^ "])"
+;;
+
 let rec expression_is_value = function
   | Function _ -> true
   | NativeFunction _ -> true
