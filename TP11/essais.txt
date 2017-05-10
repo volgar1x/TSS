@@ -1,0 +1,2 @@
+# enregistrements
+(lambda r : { x : Nat }. r.x) { x = 1, y = 2 };;
