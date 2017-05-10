@@ -63,6 +63,21 @@ let rec eval_step delta = function
   let (_, a') = eval_step delta a in
   (delta, Each (a', b))
 
+(* E-Record *)
+| (Record xs) as f when not (expression_is_value f) ->
+  let f' = Record (List.map (fun (f, t) ->
+    let (_, t') = eval_step delta t in
+    (f, t')
+  ) xs) in
+  (delta, f')
+
+(* E-Proj *)
+| Proj (self, f) ->
+  begin match Assoc.get self delta with
+  | Record xs -> (delta, Assoc.get f xs)
+  | t -> raise (Eval_error ("cannot access " ^ f ^ " of " ^ (expression_to_string t)))
+  end
+
 | v when expression_is_value v ->
   (delta, v)
 
