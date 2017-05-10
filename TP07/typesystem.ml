@@ -101,6 +101,8 @@ let rec type_of_expression gamma = function
   type_of_expression gamma' b
 
 | Variable "succ" -> (gamma, Apply (Natural, Natural))
+| Variable "pred" -> (gamma, Apply (Natural, Natural))
+| Variable "iszero" -> (gamma, Apply (Natural, Boolean))
 | Variable x ->
   begin match Assoc.find x gamma with
   | None -> raise (Type_error ("undefined variable " ^ x))
