@@ -2,6 +2,12 @@ open Expression ;;
 
 exception Eval_error of string ;;
 
+let type_of_expression delta t =
+  let gamma = Typesystem.gamma_of_delta delta in
+  let (_, ty) = Typesystem.type_of_expression gamma t in
+  ty
+;;
+
 let lambda_succ delta = function
 | Natural n -> (delta, Natural (n + 1))
 | _ -> raise (Eval_error "invalid succ")
@@ -35,6 +41,32 @@ let rec expression_recfunc name ty t =
 
 
 and eval_step delta = function
+(* references *)
+| Application (Variable "ref", v) when expression_is_value v ->
+  (delta, Ref ("<anon>", type_of_expression delta v, ref v))
+| Application (Variable "ref", t) ->
+  let (_, t') = eval_step delta t in
+  (delta, Application (Variable "ref", t'))
+
+(* reference assignment *)
+| Assign (var, v) when expression_is_value v ->
+  begin match Assoc.get var delta with
+  | Ref (_, _, r) -> r := v
+  | t -> raise (Eval_error ("cannot assign variable `" ^ var ^ "' which is " ^ (expression_to_string t)))
+  end;
+  (delta, Unit)
+| Assign (var, t) ->
+  let (_, t') = eval_step delta t in
+  (delta, Assign (var, t'))
+
+(* reference access *)
+| Access (var) ->
+  let res = match Assoc.get var delta with
+  | Ref (_, _, r) -> !r
+  | t -> raise (Eval_error ("cannot access variable `" ^ var ^ "' which is " ^ (expression_to_string t)))
+  in
+  (delta, res)
+
 (* E-AppAbs *)
 | Application (Function (x, _, t), v) when expression_is_value v ->
   (delta, expression_variable x v t)
@@ -54,6 +86,9 @@ and eval_step delta = function
   (delta, Application (t1, t2'))
 
 (* E-Alias *)
+| Global (x, Ref (_, ty, r)) ->
+  let r = Ref (x, ty, r) in
+  (Assoc.put x r delta, r)
 | Global (x, v) when expression_is_value v ->
   (Assoc.put x v delta, v)
 | Global (x, t) ->

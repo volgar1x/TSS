@@ -21,6 +21,10 @@ let rec type_of_expression gamma = function
   type_expect tty ety;
   (gamma, tty)
 
+| Application (Variable "ref", t) ->
+  let (_, ty) = type_of_expression gamma t in
+  (gamma, Ref (ty))
+
 | Application (t1, t2) ->
   let (_, t1ty) = type_of_expression gamma t1 in
   let (_, t2ty) = type_of_expression gamma t2 in
@@ -100,12 +104,29 @@ let rec type_of_expression gamma = function
   let (gamma', _) = type_of_expression gamma a in
   type_of_expression gamma' b
 
+| Assign (var, t) ->
+  let (_, ty) = type_of_expression gamma t in
+  let varty = match Assoc.find var gamma with
+  | Some (Ref x) -> x
+  | Some x -> raise (Type_error ("variable `" ^ var ^ "' is not a reference but a " ^ (string_of_type x)))
+  | None -> raise (Type_error ("undefined reference `" ^ var ^ "'"))
+  in
+  type_expect ty varty;
+  (gamma, Unit)
+
+| Access (var) ->
+  let varty = match Assoc.find var gamma with
+  | None -> raise (Type_error ("undefined reference `" ^ var ^ "'"))
+  | Some x -> x
+  in
+  (gamma, varty)
+
 | Variable "succ" -> (gamma, Apply (Natural, Natural))
 | Variable "pred" -> (gamma, Apply (Natural, Natural))
 | Variable "iszero" -> (gamma, Apply (Natural, Boolean))
 | Variable x ->
   begin match Assoc.find x gamma with
-  | None -> raise (Type_error ("undefined variable " ^ x))
+  | None -> raise (Type_error ("undefined variable `" ^ x ^ "'"))
   | Some xty -> (gamma, xty)
   end
 
@@ -114,4 +135,11 @@ let rec type_of_expression gamma = function
 | Unit -> (gamma, Unit)
 
 | t -> raise (Type_error ("TODO: " ^ (expression_to_string t)))
+;;
+
+let gamma_of_delta xs =
+  List.fold_left (fun gamma -> fun (x, t) ->
+    let (gamma', ty) = type_of_expression gamma t in
+    gamma'
+  ) [] xs
 ;;

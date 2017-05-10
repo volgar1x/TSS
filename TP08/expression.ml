@@ -94,6 +94,7 @@ type expression = Variable of string
                 | Case of expression * (variant list)
                 | Assign of string * expression
                 | Access of string
+                | Ref of string * type_ * (expression ref)
 
 and variant = VariantCase of string * string * expression
             | VariantFallthrough of expression
@@ -117,6 +118,7 @@ let rec expression_to_string = function
   | Variant (f, t, ty) -> "<" ^ f ^ " = " ^ (expression_to_string t) ^ "> as " ^ (string_of_type ty)
   | Assign (var, value) -> var ^ " := " ^ (expression_to_string value)
   | Access (var) -> "!" ^ var
+  | Ref (name, ty, slot) -> name ^ "[" ^ (expression_to_string !slot) ^ "] : " ^ (string_of_type (Ref ty))
 
   | Case (t, cases) ->
     "case " ^ (expression_to_string t) ^ " of " ^
@@ -133,6 +135,7 @@ let rec expression_is_value = function
   | Boolean _ -> true
   | Natural _ -> true
   | Unit -> true
+  | Ref _ -> true
   | Record xs -> List.for_all (fun (k, v) -> expression_is_value v) xs
   | Variant (_, t, _) -> expression_is_value t
   | _ -> false
@@ -158,6 +161,7 @@ let expression_variable x v t =
                                              cases)
   | Proj (self, f) -> Proj (aux self, f)
   | Each (t1, t2) -> Each (aux t1, aux t2)
+  | Assign (x, t) -> Assign (x, aux t)
 
   | t -> t
   in
