@@ -145,6 +145,7 @@ let expression_variable x v t =
                                               | VariantFallthrough t2 -> VariantFallthrough (aux t2))
                                              cases)
   | Proj (self, f) -> Proj (aux self, f)
+  | Each (t1, t2) -> Each (aux t1, aux t2)
 
   | t -> t
   in
