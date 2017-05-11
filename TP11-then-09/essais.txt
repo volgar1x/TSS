@@ -46,3 +46,24 @@ let f = lambda n : Nat. if iszero n then (raise Pred_0 n) else pred n
 in
   f 0
 ;;
+
+# Gérer plusieurs exceptions à la fois
+
+let f = lambda n : Nat. if iszero n then (raise Pred_0 n) else pred n
+in
+  try f 0 with Nat_expected exc -> 0 | Pred_0 exc -> 1
+;;
+
+# Gérer toutes les exceptions
+
+let f = lambda n : Nat. if iszero n then (raise Pred_0 n) else pred n
+in
+  try f 0 with Nat_expected exc -> 0 | _ => 1
+;;
+
+# Gérer toutes les exceptions (qui aura la priorité ?)
+
+let f = lambda n : Nat. if iszero n then (raise Pred_0 n) else pred n
+in
+  try f 0 with Nat_expected exc -> 0 | Pred_0 exc -> 1 | _ => 2
+;;

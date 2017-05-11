@@ -129,9 +129,13 @@ variant :
 ;
 
 variantlist :
-            | { [] }
-            | Lbar variant variantlist { $2 :: $3 }
-            | variant                  { [$1] }
+            | variant variantlist2     { $1 :: $2 }
+            |                          { [] }
+;
+
+variantlist2 :
+             | Lbar variantlist        { $2 }
+             |                         { [] }
 ;
 
 typevariantlist :
