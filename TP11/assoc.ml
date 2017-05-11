@@ -1,5 +1,3 @@
-exception Assoc_error of string ;;
-
 let rec find key = function
   | [] -> None
   | (k, v) :: tl when String.equal key k -> Some v
@@ -8,7 +6,7 @@ let rec find key = function
 
 let get key delta =
   match find key delta with
-  | None -> raise (Assoc_error ("undefined variable `" ^ key ^ "'"))
+  | None -> raise (Exceptions.Eval_error ("undefined variable `" ^ key ^ "'"))
   | Some v -> v
 ;;
 

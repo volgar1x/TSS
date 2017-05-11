@@ -36,6 +36,8 @@
 %token Lcase
 %token Lof
 %token Ltyperef
+%token Ltypesource
+%token Ltypesink
 %token Lunderscore
 
 %start line
@@ -93,6 +95,8 @@ type1 :
       | Lobrack typerecordlist Lcbrack  { Record $2 }
       | Loangle typevariantlist Lcangle { Variant ($2) }
       | Ltyperef type                   { Ref ($2) }
+      | Ltypesource type                { Source ($2) }
+      | Ltypesink type                  { Sink ($2) }
 ;
 
 recordlist :

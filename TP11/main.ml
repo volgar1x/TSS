@@ -1,8 +1,9 @@
-open Parser ;;
-open Lexer ;;
-open Expression ;;
-open Typesystem ;;
-open Ansi ;;
+open Parser
+open Lexer
+open Exceptions
+open Expression
+open Typesystem
+open Ansi;;
 
 (* check command-line parameters *)
 if (Array.length Sys.argv) <= 1 then
@@ -33,9 +34,8 @@ let rec loop gamma delta buf =
   with
   | Parsing.Parse_error -> print_endline ((Ansi.wrap [Red] "Parse error") ^ " on " ^ (code_loc buf) ^ ":  `" ^ (Lexing.lexeme buf) ^ "'\n")
   | Failure msg -> print_endline ((Ansi.wrap [Red] "Parse error") ^ " on " ^ (code_loc buf) ^ ": " ^ msg ^ "\n")
-  | Eval.Eval_error reason -> print_endline ((Ansi.wrap [Red] "Eval error") ^ " on " ^ (code_loc buf) ^ ": " ^ reason ^ "\n"); loop gamma delta buf
-  | Assoc.Assoc_error reason -> print_endline ((Ansi.wrap [Red] "Eval error") ^ " on " ^ (code_loc buf) ^ ": " ^ reason ^ "\n"); loop gamma delta buf
-  | Typesystem.Type_error reason -> print_endline ((Ansi.wrap [Red] "Type error") ^ " on " ^ (code_loc buf) ^ ": " ^ reason ^ "\n"); loop gamma delta buf
+  | Eval_error reason -> print_endline ((Ansi.wrap [Red] "Eval error") ^ " on " ^ (code_loc buf) ^ ": " ^ reason ^ "\n"); loop gamma delta buf
+  | Type_error reason -> print_endline ((Ansi.wrap [Red] "Type error") ^ " on " ^ (code_loc buf) ^ ": " ^ reason ^ "\n"); loop gamma delta buf
   | End_of_file -> ()
 ;;
 

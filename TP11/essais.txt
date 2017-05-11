@@ -1,2 +1,80 @@
-# enregistrements
-(lambda r : { x : Nat }. r.x) { x = 1, y = 2 };;
+################################################################################
+######### enregistrements
+let test1 = lambda r : { x : Nat }.
+  r.x ;;
+
+test1 {};;                     # ✗ {} >: { x : Nat }
+test1 { x = 1 };;              # ✔ { x : Nat } <: { x : Nat }
+test1 { x = 1, y = 2 };;       # ✔ { x : Nat, y : Nat } <: { x : Nat }
+test1 { y = 2 };;              # ✗ { y : Nat } ≠ { x : Nat }
+
+let test2 = lambda r : { x : { y : Nat } }.
+  r.x.y ;;
+
+test2 { x = { y = 1 } };;         # ✔
+test2 { x = { y = 1, z = 2 } };;  # ✔
+test2 { x = 1 };;                 # ✗
+
+let test3 = lambda r : { x : Nat, y : Bool }. r.y ;;
+
+test3 { x = 0, y = false } ;;     # ✔
+test3 { y = false, x = 0 } ;;     # ✔
+
+
+################################################################################
+######### fonctions
+let test4 = lambda r : { x : Nat } -> { y : Bool }.
+  (r { x = 0 }).y ;;
+
+test4 (lambda a : { x : Nat }. { y = (iszero a.x) }) ;;   # ✔ pas de variance
+test4 (lambda a : { x : Nat }. { y = false, z = 1 }) ;;   # ✔ covariance du retour
+test4 (lambda a : { x : Nat }. { }) ;;                    # ✗ covariance du retour
+test4 (lambda a : { }. { y = true }) ;;                   # ✔ contravariance du paramètre
+test4 (lambda a : { x : Nat, y : Bool }. { y = a.y }) ;;  # ✗ contravariance du paramètre
+
+
+################################################################################
+######### variants
+
+let test5 = lambda r : <a : Nat | b : Bool>.
+  case r of
+  | <a = x> => iszero x
+  | <b = x> => x
+;;
+
+test5 (<a=0> as <a : Nat | b : Bool>);;                       # ✔ rien à signaler
+test5 (<c={}> as <c : {}>);;                                  # ✗ rien à signaler
+test5 (<a=0> as <b : Bool | a : Nat>);;                       # ✔ S-VariantPerm
+test5 (<a=0> as <a : Nat | b : Bool | c : {}>);;              # ✗ S-VariantWidth
+test5 (<a=0> as <a : Nat>);;                                  # ✔ S-VariantWidth
+test5 (<b=true> as <b : Bool>);;                              # ✔ S-VariantWidth
+
+let test6 = lambda r : <a : { x : Nat} | b : {}>. unit ;;
+
+test6 (<a={x=1, y=true}> as <a : { x : Nat} | b : {}>) ;;     # ✔ S-VariantDepth
+
+
+################################################################################
+######### références
+
+let test7 = lambda r : Ref Nat. !r ;;
+
+test7 (ref 0) ;;                            # ✔ rien à signaler
+test7 (ref true) ;;                         # ✗ rien à signaler
+
+let test8 = lambda r : Ref {x : Nat, y : Bool}. !r ;;
+
+test8 (ref { x=1, y=true });;               # ✔
+test8 (ref { x=1 });;                       # ✗ invariant
+test8 (ref { y=true });;                    # ✗ invariant
+test8 (ref { x=1, y=true, z={} });;         # ✗ invariant
+
+let test9 = lambda r : Source Nat. !r ;;
+
+test9 (ref 0) ;;                            # ✔
+
+let test10 = lambda r : Sink Nat. r := 42 ;;
+
+let tmp = (ref 0) in
+test10 tmp;                                 # ✔
+!tmp ;;                                     # ✔

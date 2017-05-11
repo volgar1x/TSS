@@ -1,6 +1,5 @@
-open Expression ;;
-
-exception Eval_error of string ;;
+open Expression
+open Exceptions
 
 let lambda_succ gamma delta = function
 | Natural n -> (delta, Natural (n + 1))

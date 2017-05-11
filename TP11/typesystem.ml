@@ -1,6 +1,5 @@
-open Expression ;;
-
-exception Type_error of string ;;
+open Expression
+open Exceptions
 
 let type_expect t a b =
   if type_equal a b then ()
@@ -30,7 +29,8 @@ let rec type_of_expression gamma = function
   let (_, t2ty) = type_of_expression gamma t2 in
   (match t1ty with
   | Apply (ty, rty) ->
-    type_expect t2 t2ty ty;
+    if not (issubtype t2ty ty) then raise (Type_error
+      ("cannot apply `" ^ (string_of_type t2ty) ^ "' to `" ^ (string_of_type ty) ^ "' because it is not a subtype"));
     (gamma, rty)
   | _ -> raise (Type_error ("cannot apply " ^ (string_of_expression t1) ^ " : " ^ (string_of_type t1ty))))
 
@@ -109,6 +109,7 @@ let rec type_of_expression gamma = function
   let (_, ty) = type_of_expression gamma t in
   let varty = match varty with
   | Ref x -> x
+  | Sink x -> x
   | x -> raise (Type_error ("variable `" ^ (string_of_expression var) ^ "' is not a reference but a " ^ (string_of_type x)))
   in
   type_expect t ty varty;
@@ -117,6 +118,7 @@ let rec type_of_expression gamma = function
 | Access (Variable var) ->
   let varty = match Assoc.find var gamma with
   | Some (Ref x) -> x
+  | Some (Source x) -> x
   | Some x -> raise (Type_error ("variable `" ^ var ^ "' is not a reference but a " ^ (string_of_type x)))
   | None -> raise (Type_error ("undefined reference `" ^ var ^ "'"))
   in

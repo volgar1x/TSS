@@ -56,6 +56,8 @@ rule lexer = parse
   | "case"                                              {Lcase}
   | "of"                                                {Lof}
   | "Ref"                                               {Ltyperef}
+  | "Source"                                            {Ltypesource}
+  | "Sink"                                              {Ltypesink}
   | "_"                                                 {Lunderscore}
 
   | ['0'-'9']+                                              {Linteger (Lexing.lexeme lexbuf)}

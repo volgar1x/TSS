@@ -1,3 +1,5 @@
+open Exceptions
+
 type type_ = Boolean
            | Natural
            | Unit
@@ -6,6 +8,8 @@ type type_ = Boolean
            | Record of ((string * type_) list)
            | Variant of ((string * type_) list)
            | Ref of type_
+           | Source of type_
+           | Sink of type_
            ;;
 
 let type_of_string = function
@@ -13,56 +17,7 @@ let type_of_string = function
   | "bool" -> Boolean
   | "Nat" -> Natural
   | "Unit" -> Unit
-  | n -> Name n
-;;
-
-let rec type_record_equal left right =
-  List.for_all (fun (f1, ty1) ->
-    List.exists (fun (f2, ty2) ->
-      String.equal f1 f2 && type_equal ty1 ty2
-    ) left
-  ) right
-
-and type_variant_equal left right =
-  List.for_all (fun (f1, ty1) ->
-    List.exists (fun (f2, ty2) ->
-      String.equal f1 f2 && type_equal ty1 ty2
-    ) left
-  ) right
-
-and type_equal a b =
-  match a with
-  | Ref a' ->
-    begin match b with
-    | Ref b' -> type_equal a' b'
-    | _ -> false
-    end
-
-  | Record xs1 ->
-    begin match b with
-    | Record xs2 -> type_record_equal xs1 xs2
-    | _ -> false
-    end
-
-  | Variant xs1 ->
-    begin match b with
-    | Variant xs2 -> type_variant_equal xs1 xs2
-    | _ -> false
-    end
-
-  | Apply (aa, ab) ->
-    begin match b with
-    | Apply (ba, bb) -> (type_equal aa ba) && (type_equal ab bb)
-    | _ -> false
-    end
-
-  | _ ->
-    begin match b with
-    | Apply _ -> false
-    | Record _ -> false
-    | Variant _ -> false
-    | _ -> a == b
-    end
+  | s -> raise (Type_error ("unknown type `" ^ s ^ "'"))
 ;;
 
 let rec string_of_type = function
@@ -76,7 +31,43 @@ let rec string_of_type = function
   | Name n -> "^" ^ n
   | Ref ((Apply _) as ty) -> "Ref (" ^ (string_of_type ty) ^ ")"
   | Ref ty -> "Ref " ^ (string_of_type ty)
+  | Source ty -> "Source " ^ (string_of_type ty)
+  | Sink ty -> "Sink " ^ (string_of_type ty)
 ;;
+
+let issubtype left right =
+  let rec aux = function
+  | (Record rcd1, Record rcd2) ->
+    List.for_all (fun (f1, t1) ->
+      List.exists (fun (f2, t2) ->
+        String.equal f1 f2 && aux (t2, t1)
+      ) rcd1
+    ) rcd2
+
+  | (Apply (a, b), Apply (c, d)) ->
+    aux (c, a) && aux (b, d)
+
+  | (Variant variant1, Variant variant2) ->
+    List.for_all (fun (f1, t1) ->
+      List.exists (fun (f2, t2) ->
+        String.equal f1 f2 && aux (t1, t2)
+      ) variant2
+    ) variant1
+
+  | (Ref a, Ref b)    -> aux (a, b) && aux (b, a)
+  | (Ref a, Source b) -> aux (a, b)
+  | (Ref a, Sink b)   -> aux (b, a)
+
+  | (Natural, Natural) -> true
+  | (Boolean, Boolean) -> true
+  | (Unit, Unit) -> true
+  | _ -> false
+  in
+
+  aux (left, right)
+;;
+
+let type_equal left right = issubtype left right && issubtype right left;;
 
 type expression = Variable of string
                 | Function of string * type_ * expression
