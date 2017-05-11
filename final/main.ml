@@ -16,7 +16,7 @@ else
 (* describe where in the code we are *)
 let code_loc buf =
   let loc = buf.Lexing.lex_curr_p in
-  Ansi.wrap [Underline] ("line " ^ (string_of_int loc.Lexing.pos_lnum))
+  Ansi.wrap [Underline] (loc.Lexing.pos_fname ^ ":" ^ (string_of_int loc.Lexing.pos_lnum))
 ;;
 
 (* main evaluation loop *)
@@ -42,7 +42,11 @@ let rec loop gamma delta buf =
 
 (* open file and evaluate it *)
 let ch = open_in Sys.argv.(1) in
-try loop [] [] (Lexing.from_channel ch)
+let buf = Lexing.from_channel ch in
+buf.Lexing.lex_curr_p <- { buf.Lexing.lex_curr_p with
+  Lexing.pos_fname = Sys.argv.(1);
+};
+try loop [] [] buf
 with err -> print_endline ("unexpected error: " ^ (Printexc.to_string err));
 close_in ch
 ;;

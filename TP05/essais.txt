@@ -43,7 +43,7 @@ let c5 = lambda s : (Nat -> Nat). lambda z : Nat. s (s (s (s (s z)))) ;;
 realnat c5 ;;
 
 # encore un terme mal typé
-(lambda x : bool. x) succ 0 ;;
+(lambda x : bool. x) (succ 0) ;;
 
 # et un autre
 realnat 0 ;;

@@ -129,12 +129,18 @@ variant :
 ;
 
 variantlist :
-            | variant variantlist2     { $1 :: $2 }
-            |                          { [] }
+            |                    { [] }
+            | Lbar variantlist1  { $2 }
+            | variantlist1       { $1 }
+;
+
+variantlist1 :
+             | variant variantlist2    { $1 :: $2 }
+             |                         { [] }
 ;
 
 variantlist2 :
-             | Lbar variantlist        { $2 }
+             | Lbar variantlist1       { $2 }
              |                         { [] }
 ;
 
