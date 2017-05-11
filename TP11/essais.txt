@@ -78,3 +78,24 @@ let test10 = lambda r : Sink Nat. r := 42 ;;
 let tmp = (ref 0) in
 test10 tmp;                                 # ✔
 !tmp ;;                                     # ✔
+
+################################################################################
+######### références
+# à noté que `Any' fera office du type Top, et `Nothing' fera office du type Bottom
+
+let test11 = lambda x : Any. x ;;
+let test12 = lambda x : Nothing. x ;;
+
+test11 1 ;;
+test11 true ;;
+test11 unit ;;
+test11 {} ;;
+test11 (<a=true> as <a : Bool>) ;;
+test11 test11 ;;
+
+test12 1 ;;
+test12 true ;;
+test12 unit ;;
+test12 {} ;;
+test12 (<a=true> as <a : Bool>) ;;
+test12 test12 ;;

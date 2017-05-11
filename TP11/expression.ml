@@ -3,6 +3,8 @@ open Exceptions
 type type_ = Boolean
            | Natural
            | Unit
+           | Any
+           | Nothing
            | Apply of type_ * type_
            | Name of string
            | Record of ((string * type_) list)
@@ -17,6 +19,8 @@ let type_of_string = function
   | "bool" -> Boolean
   | "Nat" -> Natural
   | "Unit" -> Unit
+  | "Any" -> Any
+  | "Nothing" -> Nothing
   | s -> raise (Type_error ("unknown type `" ^ s ^ "'"))
 ;;
 
@@ -24,6 +28,8 @@ let rec string_of_type = function
   | Boolean -> "Bool"
   | Natural -> "Nat"
   | Unit -> "Unit"
+  | Any -> "Any"
+  | Nothing -> "Nothing"
   | Record xs -> Assoc.to_string ~kv:" : " string_of_type xs
   | Variant xs -> Assoc.to_string ~start:"<" ~stop:">" ~kv:" : " ~sep:" | " string_of_type xs
   | Apply ((Apply _) as a, b) -> "(" ^ (string_of_type a) ^ ") -> " ^ (string_of_type b)
@@ -58,6 +64,8 @@ let issubtype left right =
   | (Ref a, Source b) -> aux (a, b)
   | (Ref a, Sink b)   -> aux (b, a)
 
+  | (_, Any) -> true
+  | (_, Nothing) -> false
   | (Natural, Natural) -> true
   | (Boolean, Boolean) -> true
   | (Unit, Unit) -> true
