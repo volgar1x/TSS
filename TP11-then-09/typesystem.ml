@@ -18,7 +18,11 @@ let rec type_of_expression gamma = function
 
   let (_, tty) = type_of_expression gamma t in
   let (_, ety) = type_of_expression gamma e in
-  (gamma, type_most_common tty ety)
+  begin try
+    (gamma, type_most_common tty ety)
+  with Type_error _ ->
+    raise (Type_error ("if-then type `" ^ (string_of_type tty) ^ "' is not compatible with if-else type `" ^ (string_of_type ety) ^ "'"))
+  end
 
 | Application (Variable "ref", t) ->
   let (_, ty) = type_of_expression gamma t in
