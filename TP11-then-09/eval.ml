@@ -34,6 +34,29 @@ let rec expression_recfunc name ty t =
 
 
 and eval_step gamma delta = function
+(* exceptions *)
+| Application (Application (Variable "raise", Variable reason), _) ->
+  raise (User_error reason)
+
+(* try-with *)
+| Try (v, _) when expression_is_value v ->
+  (delta, v)
+
+| Try (t, cases) ->
+  begin try
+    let (_, t') = eval_step gamma delta t in
+    (delta, Try (t', cases))
+  with User_error exc ->
+    let res = MoreList.branch_first (function
+      | VariantCase (f, x, t2) when String.equal exc f -> Some t2
+      | VariantCase (_, _, _) -> None
+      | VariantFallthrough t2 -> Some t2
+    ) cases in
+    match res with
+    | None -> raise (User_error exc)
+    | Some t -> (delta, t)
+  end
+
 (* references *)
 | Application (Variable "ref", v) when expression_is_value v ->
   let (_, vty) = Typesystem.type_of_expression gamma v in

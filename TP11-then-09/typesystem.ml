@@ -14,15 +14,18 @@ let rec type_of_expression gamma = function
 
 | Cond (c, t, e) ->
   let (_, cty) = type_of_expression gamma c in
+  type_expect c cty Boolean;
+
   let (_, tty) = type_of_expression gamma t in
   let (_, ety) = type_of_expression gamma e in
-  type_expect c cty Boolean;
-  type_expect t tty ety;
-  (gamma, tty)
+  (gamma, type_most_common tty ety)
 
 | Application (Variable "ref", t) ->
   let (_, ty) = type_of_expression gamma t in
   (gamma, Ref (ty))
+
+| Application (Variable "raise", _) ->
+  (gamma, Apply (Any, Nothing))
 
 | Application (t1, t2) ->
   let (_, t1ty) = type_of_expression gamma t1 in
@@ -55,33 +58,13 @@ let rec type_of_expression gamma = function
 
 | Case (t, cases) ->
   let (_, ty) = type_of_expression gamma t in
+  let res = typesystem_caseof gamma ty cases in
+  (gamma, res)
 
-  let results = List.map (function
-    | VariantCase (f, x, t2) ->
-      let xty = match ty with
-        | Variant xs ->
-          begin match Assoc.find f xs with
-          | Some xty -> xty
-          | None -> raise (Type_error ("type " ^ (string_of_type ty) ^ " hasnt any variant " ^ f))
-          end
-
-        | _ ->
-          raise (Type_error ("cannot match on " ^ (string_of_type ty)))
-      in
-      let (_, t2ty) = type_of_expression (Assoc.put x xty gamma) t2 in
-      t2ty
-    | VariantFallthrough t2 ->
-      let (_, t2ty) = type_of_expression gamma t2 in
-      t2ty
-  ) cases in
-
-  if not (MoreList.allsame type_equal results) then
-    raise (Type_error "");
-
-  begin match results with
-  | [] -> (gamma, Unit)
-  | hd :: _ -> (gamma, hd)
-  end
+| Try (t, cases) ->
+  let (_, ty) = type_of_expression gamma t in
+  let res = typesystem_caseof gamma Exception cases in
+  (gamma, type_most_common ty res)
 
 | DefineRecFunc (x, ty, t, body) ->
   let gamma' = Assoc.put x ty gamma in
@@ -140,7 +123,37 @@ let rec type_of_expression gamma = function
 | Unit -> (gamma, Unit)
 
 | t -> raise (Type_error ("TODO: " ^ (string_of_expression t)))
-;;
+
+and typesystem_caseof gamma ty cases =
+  let results = List.map (function
+    | VariantCase (f, x, t2) ->
+      let xty = match ty with
+        | Variant xs ->
+          begin match Assoc.find f xs with
+          | Some xty -> xty
+          | None -> raise (Type_error ("type " ^ (string_of_type ty) ^ " hasnt any variant " ^ f))
+          end
+
+        | Exception ->
+          Exception
+
+        | _ ->
+          raise (Type_error ("cannot match on " ^ (string_of_type ty)))
+      in
+      let (_, t2ty) = type_of_expression (Assoc.put x xty gamma) t2 in
+      t2ty
+    | VariantFallthrough t2 ->
+      let (_, t2ty) = type_of_expression gamma t2 in
+      t2ty
+  ) cases in
+
+  if not (MoreList.allsame type_equal results) then
+    raise (Type_error "");
+
+  begin match results with
+  | [] -> Unit
+  | hd :: _ -> hd
+  end
 
 let gamma_of_delta xs =
   List.fold_left (fun gamma -> fun (x, t) ->

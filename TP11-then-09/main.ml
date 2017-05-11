@@ -35,6 +35,7 @@ let rec loop gamma delta buf =
   | Parsing.Parse_error -> print_endline ((Ansi.wrap [Red] "Parse error") ^ " on " ^ (code_loc buf) ^ ":  `" ^ (Lexing.lexeme buf) ^ "'\n")
   | Failure msg -> print_endline ((Ansi.wrap [Red] "Parse error") ^ " on " ^ (code_loc buf) ^ ": " ^ msg ^ "\n")
   | Eval_error reason -> print_endline ((Ansi.wrap [Red] "Eval error") ^ " on " ^ (code_loc buf) ^ ": " ^ reason ^ "\n"); loop gamma delta buf
+  | User_error reason -> print_endline ((Ansi.wrap [Red] "Runtime error") ^ " on " ^ (code_loc buf) ^ ": " ^ reason ^ "\n"); loop gamma delta buf
   | Type_error reason -> print_endline ((Ansi.wrap [Red] "Type error") ^ " on " ^ (code_loc buf) ^ ": " ^ reason ^ "\n"); loop gamma delta buf
   | End_of_file -> ()
 ;;

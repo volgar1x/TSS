@@ -20,7 +20,7 @@ in
 
 let f = lambda n : Nat. if iszero n then (raise Pred_0 n) else pred n
 in
-  try f (succ succ 0) with Pred_0 exc -> 0
+  try f (succ (succ 0)) with Pred_0 exc -> 0
 ;;
 
 

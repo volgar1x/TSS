@@ -12,6 +12,7 @@ type type_ = Boolean
            | Ref of type_
            | Source of type_
            | Sink of type_
+           | Exception
            ;;
 
 let type_of_string = function
@@ -39,6 +40,7 @@ let rec string_of_type = function
   | Ref ty -> "Ref " ^ (string_of_type ty)
   | Source ty -> "Source " ^ (string_of_type ty)
   | Sink ty -> "Sink " ^ (string_of_type ty)
+  | Exception -> "Exception"
 ;;
 
 let issubtype left right =
@@ -65,6 +67,7 @@ let issubtype left right =
   | (Ref a, Sink b)   -> aux (b, a)
 
   | (_, Any) -> true
+  | (Nothing, _) -> true
   | (_, Nothing) -> false
   | (Natural, Natural) -> true
   | (Boolean, Boolean) -> true
@@ -76,6 +79,13 @@ let issubtype left right =
 ;;
 
 let type_equal left right = issubtype left right && issubtype right left;;
+let type_most_common left right =
+  let l = issubtype left right in let r = issubtype right left in
+  if l && r then left
+  else if l then right
+  else if r then left
+  else raise (Type_error ("cannot unify " ^ (string_of_type left) ^ " and " ^ (string_of_type right)))
+;;
 
 type expression = Variable of string
                 | Function of string * type_ * expression
@@ -206,6 +216,10 @@ let expression_variable x v t =
                                               | VariantCase (f, x, t2) -> VariantCase (f, x, aux t2)
                                               | VariantFallthrough t2 -> VariantFallthrough (aux t2))
                                              cases)
+  | Try (t, cases) -> Try (aux t, List.map (function
+                                            | VariantCase (f, x, t2) -> VariantCase (f, x, aux t2)
+                                            | VariantFallthrough t2 -> VariantFallthrough (aux t2))
+                                           cases)
   | Proj (self, f) -> Proj (aux self, f)
   | Each (t1, t2) -> Each (aux t1, aux t2)
   | Assign (x, t) -> Assign (aux x, aux t)
