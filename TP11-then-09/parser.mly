@@ -35,6 +35,8 @@
 %token Las
 %token Lcase
 %token Lof
+%token Ltry
+%token Lwith
 %token Ltyperef
 %token Ltypesource
 %token Ltypesink
@@ -63,6 +65,7 @@ expr :
      | Lif expr Lthen expr Lelse expr                                      {Cond ($2, $4, $6)}
      | Loangle Lident Leq expr Lcangle Las Loangle typevariantlist Lcangle {Variant ($2, $4, Variant ($8))}
      | Lcase expr Lof variantlist                                          {Case  ($2, $4)}
+     | Ltry expr Lwith variantlist                                         {Try ($2, $4)}
      | expr1                                                               {$1}
      | expr Lcolon expr                                                    {Each ($1, $3)}
 ;
@@ -121,12 +124,14 @@ typerecordlist2 :
 
 variant :
         | Loangle Lident Leq Lident Lcangle Lfatarrow expr { VariantCase ($2, $4, $7) }
+        | Lident Lident Larrow expr                        { VariantCase ($1, $2, $4) }
         | Lunderscore Lfatarrow expr                       { VariantFallthrough ($3) }
 ;
 
 variantlist :
             | { [] }
             | Lbar variant variantlist { $2 :: $3 }
+            | variant                  { [$1] }
 ;
 
 typevariantlist :

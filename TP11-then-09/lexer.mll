@@ -55,6 +55,8 @@ rule lexer = parse
   | "as"                                                {Las}
   | "case"                                              {Lcase}
   | "of"                                                {Lof}
+  | "try"                                               {Ltry}
+  | "with"                                              {Lwith}
   | "Ref"                                               {Ltyperef}
   | "Source"                                            {Ltypesource}
   | "Sink"                                              {Ltypesink}

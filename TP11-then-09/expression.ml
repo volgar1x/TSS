@@ -96,6 +96,7 @@ type expression = Variable of string
                 | Assign of expression * expression
                 | Access of expression
                 | Ref of string * type_ * (expression ref)
+                | Try of expression * (variant list)
 
 and variant = VariantCase of string * string * expression
             | VariantFallthrough of expression
@@ -134,6 +135,14 @@ let rec string_of_expression = function
           (function VariantCase (f, x, t2) -> "<" ^ f ^ " = " ^ x ^ "> => " ^ (string_of_expression t2)
                   | VariantFallthrough t2 -> "_ => " ^ (string_of_expression t2))
           cases))
+
+  | Try (t, cases) ->
+    "try " ^ (string_of_expression t) ^ " with " ^
+      (String.concat " | "
+        (List.map
+          (function VariantCase (f, x, t2) -> "<" ^ f ^ " = " ^ x ^ "> => " ^ (string_of_expression t2)
+                  | VariantFallthrough t2 -> "_ => " ^ (string_of_expression t2))
+          cases))
 ;;
 
 let rec verbose_string_of_expression = function
@@ -156,6 +165,11 @@ let rec verbose_string_of_expression = function
   | Access (var) -> "Access(" ^ (verbose_string_of_expression var) ^ ")"
   | Ref (name, ty, slot) -> "Ref(" ^ name ^ ", " ^ (string_of_type ty) ^ ", !" ^ (verbose_string_of_expression !slot) ^ ")"
   | Case (t, cases) -> "Case(" ^ (verbose_string_of_expression t) ^ ", [" ^
+                      (String.concat ", " (List.map (function
+                        | VariantCase (f, x, t2) -> "VariantCase(" ^ f ^ ", " ^ x ^ ", " ^ (verbose_string_of_expression t2) ^ ")"
+                        | VariantFallthrough (t2) -> "VariantFallthrough(" ^ (verbose_string_of_expression t2) ^ ")"
+                       ) cases)) ^ "])"
+  | Try (t, cases) -> "Try(" ^ (verbose_string_of_expression t) ^ ", [" ^
                       (String.concat ", " (List.map (function
                         | VariantCase (f, x, t2) -> "VariantCase(" ^ f ^ ", " ^ x ^ ", " ^ (verbose_string_of_expression t2) ^ ")"
                         | VariantFallthrough (t2) -> "VariantFallthrough(" ^ (verbose_string_of_expression t2) ^ ")"
