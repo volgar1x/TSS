@@ -109,6 +109,8 @@ let rec string_of_expression = function
   | Function (var, ty, body) -> "λ" ^ var ^  " : " ^ (string_of_type ty) ^ ". " ^ (string_of_expression body)
   | NativeFunction (f, ty, rty, _) -> "λx : " ^ (string_of_type ty) ^ ". [native/" ^ f ^ " : " ^ (string_of_type rty) ^ "]"
   | DefineRecFunc (x, ty, t, rest) -> "letrec " ^ x ^ " : " ^ (string_of_type ty) ^ " = " ^ (string_of_expression t) ^ " in " ^ (string_of_expression rest)
+  | Application ((Function _) as left, ((Application _) as right)) -> "(" ^ (string_of_expression left) ^ ") (" ^ (string_of_expression right) ^ ")"
+  | Application ((Function _) as left, right) -> "(" ^ (string_of_expression left) ^ ") " ^ (string_of_expression right)
   | Application (left, ((Application _) as right)) -> (string_of_expression left) ^ " (" ^ (string_of_expression right) ^ ")"
   | Application (left, right) -> (string_of_expression left) ^ " " ^ (string_of_expression right)
   | Global (varname, varexpr) -> "let " ^ varname ^ " = " ^ (string_of_expression varexpr) ^ " ;; "
